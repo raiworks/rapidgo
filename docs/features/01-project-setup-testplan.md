@@ -172,3 +172,5 @@ N/A — this feature creates project structure only. No runtime performance char
 | **Total** | **15** | — | — | — |
 
 **Result**: ⬜ NOT RUN
+
+> To be executed during **Phase E** of [`01-project-setup-tasks.md`](01-project-setup-tasks.md).

@@ -13,7 +13,7 @@
 
 | Date | Change | Notes |
 |---|---|---|
-| | | |
+| _YYYY-MM-DD_ | _e.g., Created `core/` directory tree with 16 subdirectories_ | _On track / Deviated because..._ |
 
 ---
 

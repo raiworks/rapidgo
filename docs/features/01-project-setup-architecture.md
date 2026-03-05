@@ -369,6 +369,14 @@ make test
 
 N/A — no data flow in this feature. The entry point prints a static banner and exits.
 
+## Deferred Items
+
+The blueprint lists these as **optional** project root files. They are deployment infrastructure and will be addressed by Feature #36+ (Docker & Deployment):
+
+- `Caddyfile` — Caddy reverse proxy config
+- `Dockerfile` — Container build
+- `docker-compose.yml` — Multi-service orchestration
+
 ## Security Considerations
 
 - **`.env.local` is gitignored** — real secrets never reach version control

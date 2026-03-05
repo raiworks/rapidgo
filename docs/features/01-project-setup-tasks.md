@@ -4,7 +4,7 @@
 > **Architecture**: [`01-project-setup-architecture.md`](01-project-setup-architecture.md)
 > **Branch**: `feature/01-project-setup`
 > **Status**: 🔴 NOT STARTED
-> **Progress**: 0/28 tasks complete
+> **Progress**: 0/30 tasks complete
 
 ---
 
