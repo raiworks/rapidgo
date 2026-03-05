@@ -36,7 +36,7 @@ Provide a Go web framework that:
 |---|---|
 | Web applications | MVC + Services + Helpers pattern |
 | REST APIs | JSON responses with standardized envelope |
-| WebSockets | Real-time communication via Gorilla/Coder WebSocket |
+| WebSockets | Real-time communication via Coder WebSocket |
 | CLI tools | Scaffolding, migrations, seeds via Cobra |
 
 ### Data & Storage
@@ -49,7 +49,7 @@ Provide a Go web framework that:
 | Transactions | GORM transaction patterns (auto, manual, nested) |
 | Pagination | Configurable page-based pagination helper |
 | File storage | Local filesystem and Amazon S3 via unified interface |
-| Caching | Redis and in-memory cache with TTL support |
+| Caching | Redis, in-memory, and file-based cache with TTL support |
 
 ### HTTP & Middleware
 
@@ -91,6 +91,13 @@ Provide a Go web framework that:
 | i18n | JSON-based translation files with locale detection |
 | Health checks | Liveness and readiness probe endpoints |
 | Graceful shutdown | Signal handling with connection draining |
+
+### Testing
+
+| Capability | Description |
+|---|---|
+| Unit tests | Service, helper, and model tests using `testing` package |
+| Integration tests | HTTP handler tests with test server and database |
 
 ### Deployment
 
@@ -209,7 +216,8 @@ yourframework/
 │   ├── connection.go           # DB connection factory
 │   ├── migrations/             # Migration files
 │   ├── seeders/                # Seed data
-│   └── models/                 # GORM model structs
+│   ├── models/                 # GORM model structs
+│   └── querybuilder/           # Query builder helpers
 ├── app/
 │   ├── providers/              # Service providers
 │   ├── services/               # Business logic
@@ -260,6 +268,10 @@ Everything listed in the **Target Capabilities** section above. This is the scop
 | Two-factor auth (TOTP) | Planned for future |
 | Prometheus metrics | Planned for future |
 | Database read/write splitting | Planned for future |
+| API versioning | Planned for future |
+| WebSocket rooms / channels | Planned for future |
+| Audit logging | Planned for future |
+| Soft deletes | Planned for future |
 
 ### Non-Goals
 

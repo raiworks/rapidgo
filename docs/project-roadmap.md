@@ -134,7 +134,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 
 | # | Feature | Status | Depends On | Blueprint Sections |
 |---|---|---|---|---|
-| 32 | Caching | ⬜ | #02, #05 | Caching (Redis + memory) |
+| 32 | Caching | ⬜ | #02, #05 | Caching (Redis + memory + file) |
 | 33 | Pagination | ⬜ | #09, #11 | Pagination |
 | 34 | Events / Hooks System | ⬜ | #05 | Events / Hooks System |
 | 35 | Localization / i18n | ⬜ | #02 | Localization / i18n |
