@@ -4,13 +4,20 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/RAiWorks/RGo/app/providers"
+	"github.com/RAiWorks/RGo/core/app"
 	"github.com/RAiWorks/RGo/core/config"
-	"github.com/RAiWorks/RGo/core/logger"
 )
 
 func main() {
-	config.Load()
-	logger.Setup()
+	application := app.New()
+
+	// Register providers (order matters)
+	application.Register(&providers.ConfigProvider{})  // 1. Config first — loads .env
+	application.Register(&providers.LoggerProvider{})  // 2. Logger — uses config in Boot
+
+	// Boot all providers
+	application.Boot()
 
 	appName := config.Env("APP_NAME", "RGo")
 	appPort := config.Env("APP_PORT", "8080")
