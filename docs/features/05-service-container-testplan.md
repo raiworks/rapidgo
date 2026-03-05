@@ -189,6 +189,28 @@
 | **Status** | ⬜ Not Run |
 | **Notes** | — |
 
+### TC-16: Instance overwrites previous instance with same name
+
+| Property | Value |
+|---|---|
+| **Category** | Edge Case |
+| **Precondition** | Container with existing instance |
+| **Steps** | 1. `Instance("svc", objA)` → 2. `Instance("svc", objB)` → 3. `Make("svc")` |
+| **Expected Result** | Returns `objB` (last-write-wins) |
+| **Status** | ⬜ Not Run |
+| **Notes** | Enables test mocking by replacing services |
+
+### TC-17: Bind factory resolves another service from container
+
+| Property | Value |
+|---|---|
+| **Category** | Happy Path |
+| **Precondition** | Container with two services where one depends on the other |
+| **Steps** | 1. `Instance("config", cfg)` → 2. `Bind("svc", func(c) { return NewSvc(MustMake[Config](c, "config")) })` → 3. `Make("svc")` |
+| **Expected Result** | Factory receives the container, resolves "config", returns service built with that dependency |
+| **Status** | ⬜ Not Run |
+| **Notes** | Core DI pattern — factory uses container to resolve dependencies |
+
 ---
 
 ## Edge Cases
@@ -199,6 +221,8 @@
 | 2 | Bind called twice with same name | Last binding wins |
 | 3 | 100 concurrent Make calls on singleton | Thread-safe, same instance returned |
 | 4 | Provider with empty Boot() | No error, no-op |
+| 5 | Instance called twice with same name | Last instance wins |
+| 6 | Factory resolves other services from container | Dependency chain works correctly |
 
 ## Security Tests
 
@@ -212,9 +236,9 @@
 
 | Category | Total | Pass | Fail | Skip |
 |---|---|---|---|---|
-| Happy Path | 9 | — | — | — |
+| Happy Path | 10 | — | — | — |
 | Error Cases | 2 | — | — | — |
-| Edge Cases | 4 | — | — | — |
-| **Total** | **15** | — | — | — |
+| Edge Cases | 5 | — | — | — |
+| **Total** | **17** | — | — | — |
 
 **Result**: ⬜ NOT RUN
