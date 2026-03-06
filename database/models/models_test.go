@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -173,5 +174,39 @@ func TestUser_Defaults(t *testing.T) {
 	}
 	if !found.Active {
 		t.Fatal("expected default active to be true")
+	}
+}
+
+// --- BeforeCreate Hook ---
+
+// TC-15: BeforeCreate hashes plaintext password
+func TestUser_BeforeCreate_HashesPassword(t *testing.T) {
+	db := setupTestDB(t)
+
+	user := User{Name: "Eve", Email: "eve@test.com", Password: "mypassword"}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+
+	if user.Password == "mypassword" {
+		t.Fatal("expected password to be hashed, but it was unchanged")
+	}
+	if !strings.HasPrefix(user.Password, "$2a$") {
+		t.Fatalf("expected bcrypt hash starting with $2a$, got %q", user.Password[:10])
+	}
+}
+
+// TC-16: BeforeCreate skips already-hashed password
+func TestUser_BeforeCreate_SkipsHashed(t *testing.T) {
+	db := setupTestDB(t)
+
+	hashed := "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012"
+	user := User{Name: "Frank", Email: "frank@test.com", Password: hashed}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+
+	if user.Password != hashed {
+		t.Fatal("expected already-hashed password to be unchanged")
 	}
 }

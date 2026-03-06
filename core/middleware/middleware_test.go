@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/RAiWorks/RGo/core/auth"
 	"github.com/RAiWorks/RGo/core/errors"
 	"github.com/RAiWorks/RGo/core/session"
 	"github.com/gin-gonic/gin"
@@ -437,5 +438,104 @@ func TestSessionMiddleware_SetsSessionData(t *testing.T) {
 	}
 	if w.Body.String() != "ok" {
 		t.Fatalf("expected 'ok', got %q", w.Body.String())
+	}
+}
+
+// --- Auth Middleware ---
+
+// TC-10: AuthMiddleware rejects request without Authorization header
+func TestAuthMiddleware_RejectsMissingHeader(t *testing.T) {
+	e := newTestEngine()
+	e.Use(AuthMiddleware())
+	e.GET("/protected", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "GET", "/protected")
+	if w.Code != 401 {
+		t.Fatalf("expected 401, got %d", w.Code)
+	}
+
+	var body map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &body)
+	if body["error"] == nil {
+		t.Fatal("expected error message in response body")
+	}
+}
+
+// TC-11: AuthMiddleware rejects request with invalid token
+func TestAuthMiddleware_RejectsInvalidToken(t *testing.T) {
+	t.Setenv("JWT_SECRET", "test-secret-key")
+
+	e := newTestEngine()
+	e.Use(AuthMiddleware())
+	e.GET("/protected", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	headers := http.Header{}
+	headers.Set("Authorization", "Bearer invalid-token-value")
+	w := doRequest(e, "GET", "/protected", headers)
+	if w.Code != 401 {
+		t.Fatalf("expected 401, got %d", w.Code)
+	}
+}
+
+// TC-12: AuthMiddleware sets user_id on valid token
+func TestAuthMiddleware_SetsUserID(t *testing.T) {
+	t.Setenv("JWT_SECRET", "test-secret-key-for-auth")
+	t.Setenv("JWT_EXPIRY", "3600")
+
+	token, err := auth.GenerateToken(99)
+	if err != nil {
+		t.Fatalf("GenerateToken failed: %v", err)
+	}
+
+	e := newTestEngine()
+	e.Use(AuthMiddleware())
+	e.GET("/protected", func(c *gin.Context) {
+		uid, exists := c.Get("user_id")
+		if !exists {
+			c.String(500, "no user_id")
+			return
+		}
+		c.String(200, fmt.Sprintf("user_id=%v", uid))
+	})
+
+	headers := http.Header{}
+	headers.Set("Authorization", "Bearer "+token)
+	w := doRequest(e, "GET", "/protected", headers)
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	if w.Body.String() != "user_id=99" {
+		t.Fatalf("expected 'user_id=99', got %q", w.Body.String())
+	}
+}
+
+// TC-13: AuthMiddleware rejects non-Bearer auth scheme
+func TestAuthMiddleware_RejectsNonBearerScheme(t *testing.T) {
+	e := newTestEngine()
+	e.Use(AuthMiddleware())
+	e.GET("/protected", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	headers := http.Header{}
+	headers.Set("Authorization", "Basic abc123")
+	w := doRequest(e, "GET", "/protected", headers)
+	if w.Code != 401 {
+		t.Fatalf("expected 401, got %d", w.Code)
+	}
+}
+
+// TC-14: Auth alias is resolvable after registration
+func TestAuthAlias_IsResolvable(t *testing.T) {
+	ResetRegistry()
+	RegisterAlias("auth", AuthMiddleware())
+
+	resolved := Resolve("auth")
+	if resolved == nil {
+		t.Fatal("expected auth alias to resolve to a handler")
 	}
 }
