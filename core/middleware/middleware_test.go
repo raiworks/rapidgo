@@ -291,6 +291,111 @@ func TestCORS_CustomConfig(t *testing.T) {
 	}
 }
 
+// TC-26: Default AllowHeaders includes X-CSRF-Token
+func TestCORS_DefaultIncludesCSRFToken(t *testing.T) {
+	e := newTestEngine()
+	e.Use(CORS())
+	e.GET("/test", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "GET", "/test")
+	headers := w.Header().Get("Access-Control-Allow-Headers")
+	if !strings.Contains(headers, "X-CSRF-Token") {
+		t.Fatalf("expected Allow-Headers to contain X-CSRF-Token, got %q", headers)
+	}
+}
+
+// TC-27: AllowCredentials header set by default
+func TestCORS_DefaultCredentials(t *testing.T) {
+	e := newTestEngine()
+	e.Use(CORS())
+	e.GET("/test", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "GET", "/test")
+	creds := w.Header().Get("Access-Control-Allow-Credentials")
+	if creds != "true" {
+		t.Fatalf("expected Allow-Credentials 'true', got %q", creds)
+	}
+}
+
+// TC-28: ExposeHeaders set by default
+func TestCORS_DefaultExposeHeaders(t *testing.T) {
+	e := newTestEngine()
+	e.Use(CORS())
+	e.GET("/test", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "GET", "/test")
+	expose := w.Header().Get("Access-Control-Expose-Headers")
+	if !strings.Contains(expose, "Content-Length") || !strings.Contains(expose, "X-Request-ID") {
+		t.Fatalf("expected Expose-Headers with Content-Length and X-Request-ID, got %q", expose)
+	}
+}
+
+// TC-29: CORS_ALLOWED_ORIGINS env overrides default
+func TestCORS_EnvOverridesOrigins(t *testing.T) {
+	t.Setenv("CORS_ALLOWED_ORIGINS", "https://example.com")
+
+	e := newTestEngine()
+	e.Use(CORS())
+	e.GET("/test", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "GET", "/test")
+	origin := w.Header().Get("Access-Control-Allow-Origin")
+	if origin != "https://example.com" {
+		t.Fatalf("expected 'https://example.com', got %q", origin)
+	}
+}
+
+// TC-30: Custom config can disable credentials
+func TestCORS_CustomDisableCredentials(t *testing.T) {
+	cfg := CORSConfig{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           3600,
+	}
+
+	e := newTestEngine()
+	e.Use(CORS(cfg))
+	e.GET("/test", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "GET", "/test")
+	creds := w.Header().Get("Access-Control-Allow-Credentials")
+	if creds != "" {
+		t.Fatalf("expected no Allow-Credentials header, got %q", creds)
+	}
+}
+
+// TC-31: Preflight with new headers returns 204 with credentials + expose
+func TestCORS_PreflightWithNewHeaders(t *testing.T) {
+	e := newTestEngine()
+	e.Use(CORS())
+	e.GET("/test", func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	w := doRequest(e, "OPTIONS", "/test")
+	if w.Code != 204 {
+		t.Fatalf("expected 204, got %d", w.Code)
+	}
+	if w.Header().Get("Access-Control-Allow-Credentials") != "true" {
+		t.Fatal("expected credentials header on preflight")
+	}
+	if w.Header().Get("Access-Control-Expose-Headers") == "" {
+		t.Fatal("expected expose headers on preflight")
+	}
+}
+
 // --- ErrorHandler Tests ---
 
 // TC-13: ErrorHandler formats AppError as JSON
