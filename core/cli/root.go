@@ -25,6 +25,10 @@ func init() {
 	rootCmd.AddCommand(migrateStatusCmd)
 	rootCmd.AddCommand(makeMigrationCmd)
 	rootCmd.AddCommand(dbSeedCmd)
+	rootCmd.AddCommand(makeControllerCmd)
+	rootCmd.AddCommand(makeModelCmd)
+	rootCmd.AddCommand(makeServiceCmd)
+	rootCmd.AddCommand(makeProviderCmd)
 }
 
 // Execute runs the root command. Called from main().
