@@ -1,0 +1,10 @@
+.git
+.gitignore
+reference/
+docs/
+*.md
+*_test.go
+.env.example
+.vscode/
+.idea/
+tmp/
