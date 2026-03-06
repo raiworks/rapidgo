@@ -24,6 +24,7 @@ func init() {
 	rootCmd.AddCommand(migrateRollbackCmd)
 	rootCmd.AddCommand(migrateStatusCmd)
 	rootCmd.AddCommand(makeMigrationCmd)
+	rootCmd.AddCommand(dbSeedCmd)
 }
 
 // Execute runs the root command. Called from main().
