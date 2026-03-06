@@ -106,3 +106,23 @@ func TestRootCmd_HasVersionCommand(t *testing.T) {
 		t.Fatal("expected 'version' command to be registered on root")
 	}
 }
+
+// TC-10 (Feature #12): toSnakeCase converts PascalCase to snake_case
+func TestToSnakeCase(t *testing.T) {
+	cases := []struct {
+		input string
+		want  string
+	}{
+		{"CreateUsersTable", "create_users_table"},
+		{"addEmailIndex", "add_email_index"},
+		{"simple", "simple"},
+		{"ABCTest", "a_b_c_test"},
+	}
+
+	for _, tc := range cases {
+		got := toSnakeCase(tc.input)
+		if got != tc.want {
+			t.Errorf("toSnakeCase(%q) = %q, want %q", tc.input, got, tc.want)
+		}
+	}
+}

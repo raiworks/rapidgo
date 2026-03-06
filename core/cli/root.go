@@ -20,6 +20,10 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(migrateRollbackCmd)
+	rootCmd.AddCommand(migrateStatusCmd)
+	rootCmd.AddCommand(makeMigrationCmd)
 }
 
 // Execute runs the root command. Called from main().
