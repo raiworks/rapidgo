@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/RAiWorks/RGo/core/router"
@@ -34,17 +37,39 @@ func bodyMap(t *testing.T, w *httptest.ResponseRecorder) map[string]interface{} 
 	return m
 }
 
-// TC-01: Home returns welcome message with status 200
-func TestHome_ReturnsWelcome(t *testing.T) {
-	c, w := newTestContext("GET", "/")
-	controllers.Home(c)
+// testTemplateDir creates a temp dir with home.html for template tests.
+func testTemplateDir(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	tmpl := `<!DOCTYPE html><html><head><title>{{ .title }}</title></head><body><h1>{{ .title }}</h1></body></html>`
+	if err := os.WriteFile(filepath.Join(dir, "home.html"), []byte(tmpl), 0644); err != nil {
+		t.Fatal(err)
+	}
+	return dir
+}
+
+// TC-01: Home renders HTML template with status 200
+func TestHome_RendersHTML(t *testing.T) {
+	t.Setenv("APP_ENV", "testing")
+	dir := testTemplateDir(t)
+
+	r := router.New()
+	r.LoadTemplates(filepath.Join(dir, "*"))
+	r.Get("/", controllers.Home)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/", nil)
+	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d", w.Code)
 	}
-	m := bodyMap(t, w)
-	if m["message"] != "Welcome to RGo" {
-		t.Fatalf("expected message 'Welcome to RGo', got '%v'", m["message"])
+	ct := w.Header().Get("Content-Type")
+	if !strings.Contains(ct, "text/html") {
+		t.Fatalf("expected Content-Type text/html, got '%s'", ct)
+	}
+	if !strings.Contains(w.Body.String(), "Welcome to RGo") {
+		t.Fatalf("expected body to contain 'Welcome to RGo', got: %s", w.Body.String())
 	}
 }
 
@@ -133,7 +158,10 @@ func TestPostController_ImplementsResourceController(t *testing.T) {
 // TC-08: GET / is registered and returns 200
 func TestRoutes_HomeRegistered(t *testing.T) {
 	t.Setenv("APP_ENV", "testing")
+	dir := testTemplateDir(t)
+
 	r := router.New()
+	r.LoadTemplates(filepath.Join(dir, "*"))
 	routes.RegisterWeb(r)
 
 	w := httptest.NewRecorder()
