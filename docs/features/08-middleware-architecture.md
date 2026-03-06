@@ -38,8 +38,10 @@ app/providers/
 | `core/middleware/error_handler.go` | `middleware` | ~35 |
 | `app/providers/middleware_provider.go` | `providers` | ~30 |
 
-### Files Modified (0)
-No existing files need modification. The Router's `Use()` method already supports `gin.HandlerFunc`, and `MiddlewareProvider` is a new provider added alongside existing ones.
+### Files Modified (1)
+| File | Change |
+|---|---|
+| `cmd/main.go` | Insert `MiddlewareProvider` registration before `RouterProvider` (provider #3 → Router becomes #4) |
 
 ---
 
@@ -204,6 +206,7 @@ func generateUUID() string {
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 

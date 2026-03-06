@@ -4,7 +4,7 @@
 > **Architecture**: [`08-middleware-architecture.md`](08-middleware-architecture.md)
 > **Branch**: `feature/08-middleware`
 > **Status**: 🔴 NOT STARTED
-> **Progress**: 0/20 tasks complete
+> **Progress**: 0/21 tasks complete
 
 ---
 
@@ -93,6 +93,7 @@
 - [ ] **G.1** — Create `app/providers/middleware_provider.go` with `MiddlewareProvider`
 - [ ] **G.2** — Implement `Register()` as no-op
 - [ ] **G.3** — Implement `Boot()` — register 4 built-in aliases + default group
+- [ ] **G.4** — Update `cmd/main.go` — insert `MiddlewareProvider` before `RouterProvider` (provider #3)
 - [ ] 📍 **Checkpoint G** — Provider compiles, `go vet` clean
 
 ---
