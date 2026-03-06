@@ -870,3 +870,91 @@ func TestCSRFAlias_IsResolvable(t *testing.T) {
 		t.Fatal("expected csrf alias to resolve to a handler")
 	}
 }
+
+// --- Rate Limiting Tests ---
+
+// TC-32: Default rate limit allows requests within limit
+func TestRateLimit_AllowsWithinLimit(t *testing.T) {
+	t.Setenv("RATE_LIMIT", "5-M")
+	e := newTestEngine()
+	e.Use(RateLimitMiddleware())
+	e.GET("/ok", func(c *gin.Context) { c.String(200, "ok") })
+
+	w := doRequest(e, "GET", "/ok")
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+}
+
+// TC-33: X-RateLimit-Limit header present
+func TestRateLimit_LimitHeaderPresent(t *testing.T) {
+	t.Setenv("RATE_LIMIT", "5-M")
+	e := newTestEngine()
+	e.Use(RateLimitMiddleware())
+	e.GET("/ok", func(c *gin.Context) { c.String(200, "ok") })
+
+	w := doRequest(e, "GET", "/ok")
+	limit := w.Header().Get("X-RateLimit-Limit")
+	if limit != "5" {
+		t.Fatalf("expected X-RateLimit-Limit=5, got %q", limit)
+	}
+}
+
+// TC-34: X-RateLimit-Remaining decrements
+func TestRateLimit_RemainingDecrements(t *testing.T) {
+	t.Setenv("RATE_LIMIT", "5-M")
+	e := newTestEngine()
+	e.Use(RateLimitMiddleware())
+	e.GET("/ok", func(c *gin.Context) { c.String(200, "ok") })
+
+	w1 := doRequest(e, "GET", "/ok")
+	r1 := w1.Header().Get("X-RateLimit-Remaining")
+
+	w2 := doRequest(e, "GET", "/ok")
+	r2 := w2.Header().Get("X-RateLimit-Remaining")
+
+	if r1 <= r2 {
+		t.Fatalf("expected remaining to decrement: first=%s, second=%s", r1, r2)
+	}
+}
+
+// TC-35: Requests exceeding limit return 429
+func TestRateLimit_ExceedReturns429(t *testing.T) {
+	t.Setenv("RATE_LIMIT", "2-M")
+	e := newTestEngine()
+	e.Use(RateLimitMiddleware())
+	e.GET("/ok", func(c *gin.Context) { c.String(200, "ok") })
+
+	doRequest(e, "GET", "/ok") // 1
+	doRequest(e, "GET", "/ok") // 2
+	w := doRequest(e, "GET", "/ok") // 3 — should be rejected
+
+	if w.Code != 429 {
+		t.Fatalf("expected 429, got %d", w.Code)
+	}
+}
+
+// TC-36: Custom RATE_LIMIT env var is respected
+func TestRateLimit_CustomEnv(t *testing.T) {
+	t.Setenv("RATE_LIMIT", "10-M")
+	e := newTestEngine()
+	e.Use(RateLimitMiddleware())
+	e.GET("/ok", func(c *gin.Context) { c.String(200, "ok") })
+
+	w := doRequest(e, "GET", "/ok")
+	limit := w.Header().Get("X-RateLimit-Limit")
+	if limit != "10" {
+		t.Fatalf("expected X-RateLimit-Limit=10, got %q", limit)
+	}
+}
+
+// TC-37: Middleware alias "ratelimit" resolves
+func TestRateLimitAlias_IsResolvable(t *testing.T) {
+	ResetRegistry()
+	RegisterAlias("ratelimit", RateLimitMiddleware())
+
+	resolved := Resolve("ratelimit")
+	if resolved == nil {
+		t.Fatal("expected ratelimit alias to resolve to a handler")
+	}
+}

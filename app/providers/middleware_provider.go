@@ -19,6 +19,7 @@ func (p *MiddlewareProvider) Boot(c *container.Container) {
 	middleware.RegisterAlias("error_handler", middleware.ErrorHandler())
 	middleware.RegisterAlias("auth", middleware.AuthMiddleware())
 	middleware.RegisterAlias("csrf", middleware.CSRFMiddleware())
+	middleware.RegisterAlias("ratelimit", middleware.RateLimitMiddleware())
 
 	middleware.RegisterGroup("global",
 		middleware.Recovery(),
