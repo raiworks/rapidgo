@@ -108,7 +108,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 26 | Rate Limiting | ✅ | #08 | Rate Limiting |
 | 27 | Request ID / Tracing | ✅ | #08 | Request ID / Tracing |
 | 28 | File Upload & Storage | ✅ | #02, #05 | File Upload & Storage (local + S3) |
-| 29 | Mail / Email | ⬜ | #02, #05 | Mail / Email |
+| 29 | Mail / Email | ✅ | #02, #05 | Mail / Email |
 | 30 | Static File Serving | ⬜ | #07 | Static File Serving |
 | 31 | WebSocket Support | ⬜ | #07, #08 | WebSocket Support |
 
