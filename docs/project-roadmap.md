@@ -65,7 +65,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 |---|---|---|---|---|
 | 11 | Models (GORM) | ✅ | #09 | Models (GORM) |
 | 12 | Database Migrations | ✅ | #09, #10 | CLI Tools (migrate commands) |
-| 13 | Database Seeding | ⬜ | #09, #10, #11 | Database Seeding |
+| 13 | Database Seeding | ✅ | #09, #10, #11 | Database Seeding |
 | 14 | Database Transactions | ⬜ | #09, #11 | Database Transactions |
 | 15 | Controllers | ⬜ | #07, #08 | MVC Controller Example |
 | 16 | Response Helpers | ⬜ | #07 | Response Helpers |
