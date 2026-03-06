@@ -35,10 +35,12 @@
 1. **Think before you type.** No code is written until the discussion is complete.
 2. **Design before you build.** Architecture decisions are documented, not improvised.
 3. **Plan before you execute.** Every task is written down and checkable.
-4. **Review before you build.** All docs are reviewed and approved before implementation starts.
-5. **Test before you ship.** Every feature has a test plan with clear acceptance criteria.
-6. **Document as you go.** Changes are logged in real time, not reconstructed from memory.
-7. **Review when you're done.** Reflect, learn, carry lessons forward.
+4. **Verify before you present.** Cross-check docs against blueprint, codebase, and prior features before review.
+5. **Review before you build.** All docs are reviewed and approved before implementation starts.
+6. **Test before you ship.** Every feature has a test plan with clear acceptance criteria.
+7. **Verify before you ship.** Cross-check implementation against architecture and prior features before merging.
+8. **Document as you go.** Changes are logged in real time, not reconstructed from memory.
+9. **Review when you're done.** Reflect, learn, carry lessons forward.
 
 ### Why This Framework Exists
 
@@ -127,40 +129,42 @@ docs/
 
 ## 🔄 The Workflow — Feature Lifecycle
 
-Every feature flows through **6 stages plus a mandatory Review Gate**. Each stage has a clear entry condition and exit condition. No stage may be skipped. The Review Gate separates documentation from implementation — no code is written until docs are reviewed and approved.
+Every feature flows through **6 stages plus two Cross-Checks and a mandatory Review Gate**. Each stage has a clear entry condition and exit condition. No stage may be skipped. Cross-Checks verify completeness and catch gaps early. The Review Gate separates documentation from implementation — no code is written until docs are reviewed and approved.
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                             FEATURE LIFECYCLE                                    │
-│                                                                                  │
-│  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐                      │
-│  │    1.    │   │    2.    │   │    3.    │   │  REVIEW  │                      │
-│  │ DISCUSS  │──▶│ DESIGN   │──▶│  PLAN    │──▶│   GATE   │                      │
-│  │          │   │          │   │          │   │   🚦     │                      │
-│  └──────────┘   └──────────┘   └──────────┘   └────┬─────┘                      │
-│       │              │              │               │                            │
-│   discussion    architecture      tasks         ⏸️ STOP                          │
-│   doc created   doc created     doc created     Present docs                     │
-│                                 testplan        for user review.                 │
-│                                 doc created     Wait for approval               │
-│                                 changelog       before proceeding.              │
-│                                 doc created                                      │
-│                                 api doc              │                           │
-│                                 (if needed)     User says                        │
-│                                                 "continue"                       │
-│                                                      │                           │
-│                                                      ▼                           │
-│                          ┌──────────┐   ┌──────────┐   ┌─────────┐              │
-│                          │    4.    │   │   5.    │   │   6.    │              │
-│                          │  BUILD   │──▶│  SHIP   │──▶│ REFLECT │              │
-│                          │          │   │         │   │         │              │
-│                          └──────────┘   └─────────┘   └─────────┘              │
-│                               │              │              │                    │
-│                           changelog      review doc     review doc               │
-│                           updated        created         completed               │
-│                                                         roadmap                  │
-│                                                         updated                  │
-└──────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                               FEATURE LIFECYCLE                                        │
+│                                                                                        │
+│  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌───────────┐   ┌──────────┐            │
+│  │    1.    │   │    2.    │   │    3.    │   │  CROSS-   │   │  REVIEW  │            │
+│  │ DISCUSS  │──▶│ DESIGN   │──▶│  PLAN    │──▶│  CHECK    │──▶│   GATE   │            │
+│  │          │   │          │   │          │   │  (DOCS)   │   │   🚦     │            │
+│  └──────────┘   └──────────┘   └──────────┘   │   🔍      │   └────┬─────┘            │
+│       │              │              │          └───────────┘        │                   │
+│   discussion    architecture      tasks       Verify docs vs       ⏸️ STOP              │
+│   doc created   doc created     doc created   blueprint, scope,    Present verified     │
+│                                 testplan      consistency, cross-  docs for user review. │
+│                                 doc created   feature impact.      Wait for approval     │
+│                                 changelog     Fix gaps before      before proceeding.    │
+│                                 doc created   review gate.                               │
+│                                 api doc            │                    │                │
+│                                 (if needed)        │               User says             │
+│                                                    │               "continue"            │
+│                                                    │                    │                │
+│                                                    ▼                    ▼                │
+│                ┌──────────┐   ┌───────────┐   ┌──────────┐   ┌─────────┐               │
+│                │    4.    │   │  CROSS-   │   │   5.    │   │   6.    │               │
+│                │  BUILD   │──▶│  CHECK    │──▶│  SHIP   │──▶│ REFLECT │               │
+│                │          │   │  (IMPL)   │   │         │   │         │               │
+│                └──────────┘   │   🔍      │   └─────────┘   └─────────┘               │
+│                     │         └───────────┘        │              │                     │
+│                 changelog    Verify code vs     review doc     review doc                │
+│                 updated      architecture,      created        completed                 │
+│                              cross-feature                     roadmap                   │
+│                              impact, tests.                    updated                   │
+│                              Fix gaps before                                             │
+│                              shipping.                                                   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Stage 1 — Discuss 💬
@@ -238,7 +242,38 @@ Every feature flows through **6 stages plus a mandatory Review Gate**. Each stag
 
 ---
 
-### 🚦 Review Gate — MANDATORY STOP
+### � Cross-Check (Docs) — MANDATORY VERIFICATION
+
+> **Entry**: All planning docs created, committed, pushed, and merged to `main`
+> **Exit**: All gaps fixed, docs updated, ready for Review Gate
+
+**Purpose**: Systematically verify the documentation set against the blueprint, the existing codebase, and all prior feature docs. Catch gaps, scope creep, and inconsistencies BEFORE presenting docs to the user for review. This ensures the user always receives clean, verified docs.
+
+| # | Check | Detail |
+|---|---|---|
+| 1 | **Blueprint coverage** | Compare docs against the relevant blueprint section line by line. Every element the blueprint shows for this feature must be accounted for — either implemented or explicitly listed as deferred. |
+| 2 | **Scope check** | Identify anything in the docs that goes BEYOND the blueprint section. If present, verify it's a justified adaptation (e.g., testability, using our config system) — not scope creep. |
+| 3 | **Doc-to-doc consistency** | Discussion → Architecture → Tasks → Testplan must align. File counts, file lists, task counts, test case counts must be consistent. Every functional requirement should trace to architecture code, tasks, and tests. |
+| 4 | **Existing codebase check** | Verify docs correctly reference existing code, APIs, and file paths. Confirm file stubs and directories mentioned actually exist. Check import paths are correct. |
+| 5 | **Cross-feature impact** | Check if this feature modifies files owned by prior features. If so, verify those prior feature docs are either historically accurate (describing state at their time) or need updating. Update provider ordering comments, shared file references, etc. |
+| 6 | **`.env` / config alignment** | Verify every env var referenced in code/docs exists in `.env` (or is added). Variable names must match between `.env`, `NewXConfig()`, and architecture docs. |
+| 7 | **Architecture code review** | Verify all code blocks in the architecture doc compile conceptually — correct imports, correct function signatures, correct usage of existing framework APIs. |
+
+**Actions**:
+1. Run through the checklist above
+2. Document findings with severity (gap / scope creep / minor)
+3. Fix all gaps — update the relevant docs
+4. Commit and push fixes to `main`
+5. Present the cross-check verdict to the user
+
+**Anti-patterns to avoid**:
+- Skipping the cross-check because "the docs look fine"
+- Fixing code/gaps without updating the related docs
+- Presenting unverified docs at the Review Gate
+
+---
+
+### �🚦 Review Gate — MANDATORY STOP
 
 > **Entry**: All planning docs (discussion, architecture, tasks, testplan, changelog, api) created and committed
 > **Exit**: User has reviewed docs and explicitly says "continue"
@@ -284,6 +319,37 @@ Every feature flows through **6 stages plus a mandatory Review Gate**. Each stag
 - Working without checking off tasks
 - Forgetting to log deviations from the plan
 - Large, infrequent commits
+
+---
+
+### 🔍 Cross-Check (Implementation) — MANDATORY VERIFICATION
+
+> **Entry**: All tasks complete, all tests pass on feature branch
+> **Exit**: All gaps fixed, related docs updated, ready to Ship
+
+**Purpose**: Systematically verify the implementation against the architecture doc, all prior features, and the full test suite. Catch deviations, missing pieces, and cross-feature regressions BEFORE merging to `main`. This ensures only verified, complete code ships.
+
+| # | Check | Detail |
+|---|---|---|
+| 1 | **Code vs. architecture doc** | Compare every code block in the architecture doc against the actual implementation. Every function, struct, and interface should match. Any deviation must be logged in the changelog with a reason. |
+| 2 | **Task completion** | Verify every task in the tasks doc is genuinely complete — not just checked off. Each checkpoint should have been verified. |
+| 3 | **Test coverage** | Verify every test case in the testplan has a corresponding test function. All tests pass. Run `go test ./...` for full regression. |
+| 4 | **Scope check** | Ensure the implementation doesn't exceed what the architecture doc specifies. No extra files, no extra functions, no unplanned features. |
+| 5 | **Cross-feature impact** | If this feature modified shared files (`cmd/main.go`, `.env`, etc.), verify existing features still work. Run full test suite. Check that provider ordering comments are accurate. |
+| 6 | **Deviations logged** | Every difference between the architecture doc and the actual code must be recorded in the changelog's "Deviations from Plan" table. Zero deviations is ideal; undocumented deviations are unacceptable. |
+| 7 | **Related docs updated** | If cross-feature impact was found, update the affected docs. If `.env` was changed, verify it's documented. If provider order changed, update comments in `main.go`. |
+
+**Actions**:
+1. Run through the checklist above
+2. Document findings
+3. Fix all gaps — update code and/or docs
+4. Commit and push fixes
+5. Present the cross-check verdict (can be combined with Ship summary)
+
+**Anti-patterns to avoid**:
+- Shipping without cross-checking
+- Finding deviations but not logging them in the changelog
+- Fixing code without updating the corresponding docs
 
 ### Stage 5 — Ship 🚀
 
@@ -388,16 +454,18 @@ A feature is **DONE** when ALL of the following are true:
 |---|---|---|
 | 1 | Discussion doc is marked COMPLETE | Summary present, date noted |
 | 2 | Architecture doc is FINALIZED | All sections filled, trade-offs documented |
-| 3 | All tasks in tasks doc are checked off | Every `[ ]` is `[x]` |
-| 4 | All test plan test cases pass | Test summary table filled |
-| 5 | No known bugs remain | Or documented as accepted/deferred |
-| 6 | Changelog reflects actual implementation | Deviations logged with reasons |
-| 7 | Code is self-reviewed | Diff read, code is clean |
-| 8 | Feature branch merged to main | Fast-forward or merge commit |
-| 9 | Main pushed to remote | CI/CD green (if configured) |
-| 10 | Feature branch preserved | Not deleted |
-| 11 | Review doc completed | Lessons captured |
-| 12 | Roadmap updated | Feature marked complete |
+| 3 | Docs cross-check passed | Blueprint coverage, scope, consistency verified |
+| 4 | All tasks in tasks doc are checked off | Every `[ ]` is `[x]` |
+| 5 | All test plan test cases pass | Test summary table filled |
+| 6 | Implementation cross-check passed | Code vs. architecture, cross-feature, regression verified |
+| 7 | No known bugs remain | Or documented as accepted/deferred |
+| 8 | Changelog reflects actual implementation | Deviations logged with reasons |
+| 9 | Code is self-reviewed | Diff read, code is clean |
+| 10 | Feature branch merged to main | Fast-forward or merge commit |
+| 11 | Main pushed to remote | CI/CD green (if configured) |
+| 12 | Feature branch preserved | Not deleted |
+| 13 | Review doc completed | Lessons captured |
+| 14 | Roadmap updated | Feature marked complete |
 
 If any criterion is not met, the feature is **NOT DONE** — regardless of whether the code works.
 
@@ -1260,18 +1328,34 @@ Before merging any feature, verify:
 13.  Merge docs branch to main, push main                 (merge)
 14.  Keep docs branch — do not delete                     (preserve)
 
+ ─── � CROSS-CHECK (DOCS) ── MANDATORY VERIFICATION ──────────────────
+15.  Verify docs vs blueprint section (line by line)      (completeness)
+16.  Check for scope creep — nothing beyond blueprint     (scope)
+17.  Verify doc-to-doc consistency (files, tasks, tests)  (consistency)
+18.  Verify against existing codebase and .env            (accuracy)
+19.  Check cross-feature impact on prior features/docs    (impact)
+20.  Fix all gaps, commit and push fixes to main          (fix)
+
  ─── 🚦 REVIEW GATE ── MANDATORY STOP ─────────────────────────────────
-15.  Present doc summary to user for review               (gate)
-16.  ⏸️  WAIT for user to review and say "continue"        (gate)
+21.  Present cross-check verdict + doc summary to user    (gate)
+22.  ⏸️  WAIT for user to review and say "continue"        (gate)
 
  ─── IMPLEMENTATION PHASE ──────────────────────────────────────────────
-17.  Create  git branch: feature/XX-feature-name          (from main)
-18.  Execute tasks, log in changelog                      (build)
-19.  Run test plan                                        (verify)
-20.  Push feature branch, merge to main, push main        (ship)
-21.  Keep feature branch — do not delete                  (preserve)
-22.  Create  docs/features/XX-feature-review.md           (reflect)
-23.  Update  project-roadmap.md progress tracker          (track)
+23.  Create  git branch: feature/XX-feature-name          (from main)
+24.  Execute tasks, log in changelog                      (build)
+25.  Run test plan                                        (verify)
+
+ ─── 🔍 CROSS-CHECK (IMPL) ── MANDATORY VERIFICATION ─────────────────
+26.  Verify code matches architecture doc                 (accuracy)
+27.  Verify all deviations logged in changelog            (traceability)
+28.  Verify cross-feature impact, full regression passes  (stability)
+29.  Fix all gaps, update code and/or docs                (fix)
+
+ ─── SHIP & REFLECT ────────────────────────────────────────────────────
+30.  Push feature branch, merge to main, push main        (ship)
+31.  Keep feature branch — do not delete                  (preserve)
+32.  Create  docs/features/XX-feature-review.md           (reflect)
+33.  Update  project-roadmap.md progress tracker          (track)
 ```
 
 ### Document Quick Reference
