@@ -1,10 +1,11 @@
 package routes
 
-import "github.com/RAiWorks/RGo/core/router"
+import (
+	"github.com/RAiWorks/RGo/core/router"
+	"github.com/RAiWorks/RGo/http/controllers"
+)
 
 // RegisterWeb defines web (HTML) routes.
 func RegisterWeb(r *router.Router) {
-	// Web routes will be added here.
-	// Example:
-	// r.Get("/", controllers.Home)
+	r.Get("/", controllers.Home)
 }
