@@ -73,7 +73,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 18 | Services Layer | ✅ | #05, #11 | Services Layer |
 | 19 | Helpers | ✅ | #01 | Helpers, Built-in String & Data Helpers |
 | 20 | Session Management | ✅ | #02, #08, #09 | Session Management (DB, Redis, file, memory, cookie — all 5 backends) |
-| 21 | Authentication | ⬜ | #20, #11, #19, #22 | Authentication (JWT + session-based) |
+| 21 | Authentication | ✅ | #20, #11, #19, #22 | Authentication (JWT + session-based) |
 | 22 | Crypto & Security Utilities | ⬜ | #01 | Built-in Crypto & Security Utilities |
 
 ### Phase 2 — Blueprint Coverage
