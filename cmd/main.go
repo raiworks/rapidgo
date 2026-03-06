@@ -17,8 +17,9 @@ func main() {
 	// Register providers (order matters)
 	application.Register(&providers.ConfigProvider{})      // 1. Config first — loads .env
 	application.Register(&providers.LoggerProvider{})       // 2. Logger — uses config in Boot
-	application.Register(&providers.MiddlewareProvider{})   // 3. Middleware — registers aliases before routes
-	application.Register(&providers.RouterProvider{})       // 4. Router — creates Gin engine, defines routes
+	application.Register(&providers.DatabaseProvider{})     // 3. Database — registers lazy singleton
+	application.Register(&providers.MiddlewareProvider{})   // 4. Middleware — registers aliases before routes
+	application.Register(&providers.RouterProvider{})       // 5. Router — creates Gin engine, defines routes
 
 	// Boot all providers
 	application.Boot()

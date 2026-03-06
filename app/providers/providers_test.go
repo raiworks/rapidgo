@@ -22,6 +22,9 @@ var _ container.Provider = (*RouterProvider)(nil)
 // TC-16: MiddlewareProvider implements Provider interface (compile-time check)
 var _ container.Provider = (*MiddlewareProvider)(nil)
 
+// TC-10: DatabaseProvider implements Provider interface (compile-time check)
+var _ container.Provider = (*DatabaseProvider)(nil)
+
 // TC-03: ConfigProvider.Register loads config
 func TestConfigProvider_RegisterLoadsConfig(t *testing.T) {
 	t.Setenv("APP_NAME", "TestApp")
@@ -141,6 +144,41 @@ func TestFullAppBootstrap_WithRouter(t *testing.T) {
 	r := container.MustMake[*router.Router](a.Container, "router")
 	if r == nil {
 		t.Fatal("expected non-nil *Router after full bootstrap")
+	}
+}
+
+// TC-11: DatabaseProvider.Register registers "db" binding
+func TestDatabaseProvider_RegistersBinding(t *testing.T) {
+	c := container.New()
+	p := &DatabaseProvider{}
+	p.Register(c)
+
+	if !c.Has("db") {
+		t.Fatal("expected 'db' binding to be registered")
+	}
+}
+
+// TC-12: Full bootstrap with DatabaseProvider (SQLite integration)
+func TestDatabaseProvider_FullBootstrap(t *testing.T) {
+	t.Setenv("DB_DRIVER", "sqlite")
+	t.Setenv("DB_NAME", ":memory:")
+	t.Setenv("DB_MAX_OPEN_CONNS", "1")
+	t.Setenv("DB_MAX_IDLE_CONNS", "1")
+	t.Setenv("DB_CONN_MAX_LIFETIME", "1")
+	t.Setenv("DB_CONN_MAX_IDLE_TIME", "1")
+	t.Setenv("LOG_LEVEL", "info")
+	t.Setenv("LOG_FORMAT", "json")
+	t.Setenv("LOG_OUTPUT", "stdout")
+
+	a := app.New()
+	a.Register(&ConfigProvider{})
+	a.Register(&LoggerProvider{})
+	a.Register(&DatabaseProvider{})
+	a.Boot()
+
+	db := a.Container.Make("db")
+	if db == nil {
+		t.Fatal("expected non-nil db after full bootstrap")
 	}
 }
 

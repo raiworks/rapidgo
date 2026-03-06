@@ -3,8 +3,8 @@
 > **Feature**: `09` — Database Connection
 > **Architecture**: [`09-database-architecture.md`](09-database-architecture.md)
 > **Branch**: `feature/09-database`
-> **Status**: 🔴 NOT STARTED
-> **Progress**: 0/15 tasks complete
+> **Status**: � COMPLETE
+> **Progress**: 15/15 tasks complete
 
 ---
 
@@ -12,7 +12,7 @@
 
 - [x] Discussion doc is marked COMPLETE
 - [x] Architecture doc is FINALIZED
-- [ ] Feature branch created from latest `main`
+- [x] Feature branch created from latest `main`
 - [x] Dependent features are merged to `main`
 - [x] Test plan doc created
 - [x] Changelog doc created (empty)
@@ -23,8 +23,8 @@
 
 > Add GORM and driver packages to the project.
 
-- [ ] **A.1** — Run `go get gorm.io/gorm gorm.io/driver/postgres gorm.io/driver/mysql github.com/glebarez/sqlite`
-- [ ] 📍 **Checkpoint A** — `go build ./...` succeeds, `go.mod` lists new dependencies
+- [x] **A.1** — Run `go get gorm.io/gorm gorm.io/driver/postgres gorm.io/driver/mysql github.com/glebarez/sqlite`
+- [x] 📍 **Checkpoint A** — `go build ./...` succeeds, `go.mod` lists new dependencies
 
 ---
 
@@ -32,13 +32,13 @@
 
 > Implement database config, DSN builder, and connection factory.
 
-- [ ] **B.1** — Expand `database/connection.go`: add `DBConfig` struct + `NewDBConfig()` function
-- [ ] **B.2** — Implement `DSN()` method on `DBConfig` (postgres, mysql, sqlite formats)
-- [ ] **B.3** — Implement `newDialector()` internal function (switch on driver, return `gorm.Dialector`)
-- [ ] **B.4** — Implement `ConnectWithConfig(cfg DBConfig) (*gorm.DB, error)`
-- [ ] **B.5** — Implement `Connect() (*gorm.DB, error)` wrapper calling `NewDBConfig()` + `ConnectWithConfig()`
-- [ ] **B.6** — Update `.env` — add commented-out pool tuning variables (`DB_MAX_OPEN_CONNS`, `DB_MAX_IDLE_CONNS`, `DB_CONN_MAX_LIFETIME`, `DB_CONN_MAX_IDLE_TIME`)
-- [ ] 📍 **Checkpoint B** — `go build ./database/...` succeeds, `go vet ./database/...` clean
+- [x] **B.1** — Expand `database/connection.go`: add `DBConfig` struct + `NewDBConfig()` function
+- [x] **B.2** — Implement `DSN()` method on `DBConfig` (postgres, mysql, sqlite formats)
+- [x] **B.3** — Implement `newDialector()` internal function (switch on driver, return `gorm.Dialector`)
+- [x] **B.4** — Implement `ConnectWithConfig(cfg DBConfig) (*gorm.DB, error)`
+- [x] **B.5** — Implement `Connect() (*gorm.DB, error)` wrapper calling `NewDBConfig()` + `ConnectWithConfig()`
+- [x] **B.6** — Update `.env` — add commented-out pool tuning variables (`DB_MAX_OPEN_CONNS`, `DB_MAX_IDLE_CONNS`, `DB_CONN_MAX_LIFETIME`, `DB_CONN_MAX_IDLE_TIME`)
+- [x] 📍 **Checkpoint B** — `go build ./database/...` succeeds, `go vet ./database/...` clean
 
 ---
 
@@ -46,9 +46,9 @@
 
 > Integrate database connection with the provider lifecycle.
 
-- [ ] **C.1** — Create `app/providers/database_provider.go` with `Register()` (Singleton) and `Boot()` (no-op)
-- [ ] **C.2** — Update `cmd/main.go` — insert `DatabaseProvider` as provider #3 (Middleware → #4, Router → #5)
-- [ ] 📍 **Checkpoint C** — `go build ./...` succeeds, `go vet ./...` clean
+- [x] **C.1** — Create `app/providers/database_provider.go` with `Register()` (Singleton) and `Boot()` (no-op)
+- [x] **C.2** — Update `cmd/main.go` — insert `DatabaseProvider` as provider #3 (Middleware → #4, Router → #5)
+- [x] 📍 **Checkpoint C** — `go build ./...` succeeds, `go vet ./...` clean
 
 ---
 
@@ -56,11 +56,11 @@
 
 > Comprehensive test suite for config, DSN, connection, and provider.
 
-- [ ] **D.1** — Create `database/database_test.go` with config, DSN, and connection tests
-- [ ] **D.2** — Add provider tests to `app/providers/providers_test.go` (compile-time check + binding test)
-- [ ] **D.3** — Run `go test ./database/...` — all tests pass
-- [ ] **D.4** — Run `go test ./...` + `go vet ./...` — full regression, no failures
-- [ ] 📍 **Checkpoint D** — All tests pass, zero vet warnings
+- [x] **D.1** — Create `database/database_test.go` with config, DSN, and connection tests
+- [x] **D.2** — Add provider tests to `app/providers/providers_test.go` (compile-time check + binding test)
+- [x] **D.3** — Run `go test ./database/...` — all tests pass
+- [x] **D.4** — Run `go test ./...` + `go vet ./...` — full regression, no failures
+- [x] 📍 **Checkpoint D** — All tests pass, zero vet warnings
 
 ---
 
@@ -68,9 +68,9 @@
 
 > Changelog, self-review.
 
-- [ ] **E.1** — Update changelog doc with implementation summary
-- [ ] **E.2** — Self-review all diffs — code is clean, idiomatic Go
-- [ ] 📍 **Checkpoint E** — Clean code, complete docs, ready to ship
+- [x] **E.1** — Update changelog doc with implementation summary
+- [x] **E.2** — Self-review all diffs — code is clean, idiomatic Go
+- [x] 📍 **Checkpoint E** — Clean code, complete docs, ready to ship
 
 ---
 
