@@ -3,10 +3,12 @@ package cli
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/RAiWorks/RGo/core/config"
 	"github.com/RAiWorks/RGo/core/container"
 	"github.com/RAiWorks/RGo/core/router"
+	"github.com/RAiWorks/RGo/core/server"
 	"github.com/spf13/cobra"
 )
 
@@ -42,8 +44,15 @@ var serveCmd = &cobra.Command{
 		)
 
 		r := container.MustMake[*router.Router](application.Container, "router")
-		if err := r.Run(":" + port); err != nil {
-			slog.Error("server failed to start", "err", err)
+		if err := server.ListenAndServe(server.Config{
+			Addr:            ":" + port,
+			Handler:         r,
+			ReadTimeout:     15 * time.Second,
+			WriteTimeout:    15 * time.Second,
+			IdleTimeout:     60 * time.Second,
+			ShutdownTimeout: 30 * time.Second,
+		}); err != nil {
+			slog.Error("server error", "err", err)
 		}
 	},
 }
