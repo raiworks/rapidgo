@@ -104,7 +104,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 |---|---|---|---|---|
 | 23 | Input Validation | ✅ | #07, #15 | Input Validation (Built-in) |
 | 24 | CSRF Protection | ✅ | #08, #20 | CSRF Protection |
-| 25 | CORS Handling | ⬜ | #08 | CORS |
+| 25 | CORS Handling | ✅ | #08 | CORS |
 | 26 | Rate Limiting | ⬜ | #08 | Rate Limiting |
 | 27 | Request ID / Tracing | ⬜ | #08 | Request ID / Tracing |
 | 28 | File Upload & Storage | ⬜ | #02, #05 | File Upload & Storage (local + S3) |
