@@ -161,7 +161,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 38 | Caddy Integration | ✅ | #02 | Caddy Web Server (Optional) |
 | 39 | Docker Deployment | ✅ | #37 | Docker (Optional) |
 | 40 | Testing Infrastructure | ✅ | #01, #05 | Testing |
-| 41 | Code Generation (CLI) | ⬜ | #10 | CLI Tools (make:controller, make:model, etc.) |
+| 41 | Code Generation (CLI) | ✅ | #10 | CLI Tools (make:controller, make:model, etc.) |
 
 ### Phase 5 — Blueprint Coverage
 
