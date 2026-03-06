@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Home handles the root route and returns a welcome message.
+// Home renders the home page using the home.html template.
 func Home(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Welcome to RGo",
+	c.HTML(http.StatusOK, "home.html", gin.H{
+		"title": "Welcome to RGo",
 	})
 }

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"html/template"
 	"net/http"
 
 	"github.com/RAiWorks/RGo/core/config"
@@ -79,6 +80,27 @@ func (r *Router) Group(prefix string, handlers ...gin.HandlerFunc) *RouteGroup {
 // Use adds global middleware to the router.
 func (r *Router) Use(middleware ...gin.HandlerFunc) {
 	r.engine.Use(middleware...)
+}
+
+// SetFuncMap sets the template function map on the Gin engine.
+// Must be called before LoadTemplates.
+func (r *Router) SetFuncMap(funcMap template.FuncMap) {
+	r.engine.SetFuncMap(funcMap)
+}
+
+// LoadTemplates loads HTML templates matching the glob pattern.
+func (r *Router) LoadTemplates(pattern string) {
+	r.engine.LoadHTMLGlob(pattern)
+}
+
+// Static serves files from a local directory under the given URL path.
+func (r *Router) Static(urlPath, dirPath string) {
+	r.engine.Static(urlPath, dirPath)
+}
+
+// StaticFile serves a single file at the given URL path.
+func (r *Router) StaticFile(urlPath, filePath string) {
+	r.engine.StaticFile(urlPath, filePath)
 }
 
 // Run starts the HTTP server on the given address.
