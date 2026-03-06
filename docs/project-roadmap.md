@@ -63,7 +63,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 
 | # | Feature | Status | Depends On | Blueprint Sections |
 |---|---|---|---|---|
-| 11 | Models (GORM) | ⬜ | #09 | Models (GORM) |
+| 11 | Models (GORM) | ✅ | #09 | Models (GORM) |
 | 12 | Database Migrations | ⬜ | #09, #10 | CLI Tools (migrate commands) |
 | 13 | Database Seeding | ⬜ | #09, #10, #11 | Database Seeding |
 | 14 | Database Transactions | ⬜ | #09, #11 | Database Transactions |
