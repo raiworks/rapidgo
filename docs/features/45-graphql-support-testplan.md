@@ -2,7 +2,7 @@
 
 > **Feature**: `45` — GraphQL Support
 > **Tasks**: [`45-graphql-support-tasks.md`](45-graphql-support-tasks.md)
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
 
 ---

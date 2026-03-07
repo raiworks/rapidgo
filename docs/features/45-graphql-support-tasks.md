@@ -2,7 +2,7 @@
 
 > **Feature**: `45` — GraphQL Support
 > **Architecture**: [`45-graphql-support-architecture.md`](45-graphql-support-architecture.md)
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
 
 ---

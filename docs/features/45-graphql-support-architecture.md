@@ -2,7 +2,7 @@
 
 > **Feature**: `45` — GraphQL Support
 > **Discussion**: [`45-graphql-support-discussion.md`](45-graphql-support-discussion.md)
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
 
 ---

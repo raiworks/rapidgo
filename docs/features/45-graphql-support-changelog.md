@@ -1,8 +1,9 @@
 # 📝 Changelog: GraphQL Support
 
 > **Feature**: `45` — GraphQL Support
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
+> **Commit**: `91a6a58`
 
 ---
 
