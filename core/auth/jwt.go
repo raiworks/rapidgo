@@ -16,6 +16,9 @@ func GenerateToken(userID uint) (string, error) {
 	if secret == "" {
 		return "", errors.New("JWT_SECRET is not set")
 	}
+	if len(secret) < 32 {
+		return "", errors.New("JWT_SECRET must be at least 32 bytes")
+	}
 
 	expiry := 3600 // default 1 hour
 	if v := os.Getenv("JWT_EXPIRY"); v != "" {
@@ -40,6 +43,9 @@ func ValidateToken(tokenStr string) (jwt.MapClaims, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		return nil, errors.New("JWT_SECRET is not set")
+	}
+	if len(secret) < 32 {
+		return nil, errors.New("JWT_SECRET must be at least 32 bytes")
 	}
 
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {

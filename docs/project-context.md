@@ -99,6 +99,8 @@ Provide a Go web framework that:
 | Unit tests | Service, helper, and model tests using `testing` package |
 | Integration tests | HTTP handler tests with test server and database |
 
+> **Test location**: All tests are **co-located** next to the code they test (e.g. `core/auth/auth_test.go`). The top-level `tests/` directory is reserved for future end-to-end or cross-package integration tests; `testing/testutil/` holds shared test helpers.
+
 ### Deployment
 
 | Capability | Description |
@@ -266,7 +268,7 @@ yourframework/
 │   ├── cache/                  # File-based cache
 │   ├── sessions/               # File-based sessions
 │   └── logs/                   # Log files
-├── tests/
+├── tests/                      # Reserved for cross-package / E2E tests
 │   ├── unit/
 │   └── integration/
 ├── docs/                       # This documentation

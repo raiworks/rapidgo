@@ -571,7 +571,7 @@ func TestAuthMiddleware_RejectsMissingHeader(t *testing.T) {
 
 // TC-11: AuthMiddleware rejects request with invalid token
 func TestAuthMiddleware_RejectsInvalidToken(t *testing.T) {
-	t.Setenv("JWT_SECRET", "test-secret-key")
+	t.Setenv("JWT_SECRET", "test-secret-key-padded-to-32-by!")
 
 	e := newTestEngine()
 	e.Use(AuthMiddleware())
@@ -589,7 +589,7 @@ func TestAuthMiddleware_RejectsInvalidToken(t *testing.T) {
 
 // TC-12: AuthMiddleware sets user_id on valid token
 func TestAuthMiddleware_SetsUserID(t *testing.T) {
-	t.Setenv("JWT_SECRET", "test-secret-key-for-auth")
+	t.Setenv("JWT_SECRET", "test-secret-key-for-auth-32bytes")
 	t.Setenv("JWT_EXPIRY", "3600")
 
 	token, err := auth.GenerateToken(99)
