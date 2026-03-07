@@ -32,9 +32,9 @@ applications, REST APIs, and real-time WebSocket services.
 
 ## Project Status
 
-**Phase:** Core Skeleton (Feature #01 complete)
+**Phase:** All 56 features shipped (Phases 1–6 complete)
 
-The framework has a fully initialized Go module, complete directory structure, and project scaffold. Features are being built following the [Mastery](docs/mastery.md) development process.
+The framework is feature-complete with full test coverage across 39+ packages. All features were built following the [Mastery](docs/mastery.md) development process.
 
 ## Documentation
 
@@ -48,6 +48,9 @@ All documentation lives in the [`docs/`](docs/) directory:
 ## Quick Start
 
 ```bash
+# Setup
+cp .env.example .env   # then edit .env with your credentials
+
 # Build
 make build
 
@@ -69,12 +72,17 @@ make test
 | HTTP Router | [Gin](https://github.com/gin-gonic/gin) |
 | ORM | [GORM](https://gorm.io) |
 | CLI | [Cobra](https://github.com/spf13/cobra) |
-| Config | [godotenv](https://github.com/joho/godotenv) / [Viper](https://github.com/spf13/viper) |
+| Config | [godotenv](https://github.com/joho/godotenv) |
 | JWT | [golang-jwt](https://github.com/golang-jwt/jwt) |
 | WebSocket | [coder/websocket](https://github.com/coder/websocket) |
 | Redis | [go-redis](https://github.com/redis/go-redis) |
 | Mail | [go-mail](https://github.com/wneessen/go-mail) |
 | S3 | [aws-sdk-go-v2](https://github.com/aws/aws-sdk-go-v2) |
+| Scheduler | [robfig/cron](https://github.com/robfig/cron) |
+| TOTP | [pquerna/otp](https://github.com/pquerna/otp) |
+| GraphQL | [graphql-go](https://github.com/graphql-go/graphql) |
+| OAuth2 | [x/oauth2](https://pkg.go.dev/golang.org/x/oauth2) |
+| Metrics | [prometheus](https://github.com/prometheus/client_golang) |
 
 ## License
 

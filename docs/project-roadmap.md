@@ -176,25 +176,30 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 
 ---
 
-## Phase 6 — Advanced (Future)
-
-> Not in current scope. Tracked here for planning visibility.
+## Phase 6 — Advanced
 
 | # | Feature | Status | Depends On | Blueprint Section |
 |---|---|---|---|---|
-| 42 | Queue Workers / Background Jobs | 🔮 | #05, #09 | Advanced Features (Planned) |
-| 43 | Task Scheduler / Cron | 🔮 | #05 | Advanced Features (Planned) |
-| 44 | Plugin / Module System | 🔮 | #05, #06 | Advanced Features (Planned) |
-| 45 | GraphQL Support | 🔮 | #07 | Advanced Features (Planned) |
+| 42 | Queue Workers / Background Jobs | ✅ | #05, #09 | Advanced Features (Shipped) |
+| 43 | Task Scheduler / Cron | ✅ | #05 | Advanced Features (Shipped) |
+| 44 | Plugin / Module System | ✅ | #05, #06 | Advanced Features (Shipped) |
+| 45 | GraphQL Support | ✅ | #07 | Advanced Features (Shipped) |
 | 46 | Admin Panel Scaffolding | ✅ | #15, #17 | Advanced Features (Shipped) |
-| 47 | API Versioning | 🔮 | #07 | Advanced Features (Planned) |
-| 48 | WebSocket Rooms / Channels | 🔮 | #31 | Advanced Features (Planned) |
-| 49 | OAuth2 / Social Login | 🔮 | #21 | Advanced Features (Planned) |
-| 50 | Two-Factor Authentication (TOTP) | 🔮 | #21 | Advanced Features (Planned) |
-| 51 | Audit Logging | 🔮 | #11, #03 | Advanced Features (Planned) |
-| 52 | Soft Deletes | 🔮 | #11 | Advanced Features (Planned) |
-| 53 | Database Read/Write Splitting | 🔮 | #09 | Advanced Features (Planned) |
-| 54 | Prometheus Metrics | 🔮 | #07 | Advanced Features (Planned) |
+| 47 | API Versioning | ✅ | #07 | Advanced Features (Shipped) |
+| 48 | WebSocket Rooms / Channels | ✅ | #31 | Advanced Features (Shipped) |
+| 49 | OAuth2 / Social Login | ✅ | #21 | Advanced Features (Shipped) |
+| 50 | Two-Factor Authentication (TOTP) | ✅ | #21 | Advanced Features (Shipped) |
+| 51 | Audit Logging | ✅ | #11, #03 | Advanced Features (Shipped) |
+| 52 | Soft Deletes | ✅ | #11 | Advanced Features (Shipped) |
+| 53 | Database Read/Write Splitting | ✅ | #09 | Advanced Features (Shipped) |
+| 54 | Prometheus Metrics | ✅ | #07 | Advanced Features (Shipped) |
+
+## Additional Features
+
+| # | Feature | Status | Depends On | Blueprint Section |
+|---|---|---|---|---|
+| 55 | Framework Rename (RGo → RapidGo) | ✅ | — | Infrastructure (Shipped) |
+| 56 | Service Mode (Multi-Port Serving) | ✅ | #07 | Infrastructure (Shipped) |
 
 ---
 
@@ -257,8 +262,9 @@ Every blueprint section mapped to its feature number. No gaps, no extras.
 | Phase 3 — Web Essentials | 23–31 | 9/9 | 0 | ✅ Complete |
 | Phase 4 — Caching + Events | 32–35 | 4/4 | 0 | ✅ Complete |
 | Phase 5 — Deploy + Testing + DX | 36–41 | 6/6 | 0 | ✅ Complete |
-| Phase 6 — Advanced (Future) | 42–54 | 0/13 | 13 | 🔮 Future |
-| **Total (Current Scope)** | **01–41** | **41/41** | **0** | **✅ Complete** |
+| Phase 6 — Advanced | 42–54 | 13/13 | 0 | ✅ Complete |
+| Additional | 55–56 | 2/2 | 0 | ✅ Complete |
+| **Total** | **01–56** | **56/56** | **0** | **✅ Complete** |
 
 ---
 
@@ -290,7 +296,7 @@ Every blueprint section mapped to its feature number. No gaps, no extras.
 
 - **Feature numbering is final** — do not renumber. If a feature is added later, append it with the next available number.
 - **Dependencies are strict** — do not start a feature until its dependencies are complete.
-- **Phase 6 is out of scope** — tracked for visibility only. Do not create feature docs for Phase 6 until the current scope (Phases 1–5) is complete.
+- **Phases 1–6 are complete** — all 56 features shipped with full Mastery documentation.
 - **Each feature gets its own Mastery document set** — discussion, architecture, tasks, testplan, changelog, review (and api spec if applicable).
 - **Update this document** after every feature merge — mark status, update counts.
 

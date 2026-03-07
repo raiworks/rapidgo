@@ -82,7 +82,7 @@ Provide a Go web framework that:
 |---|---|
 | Service container | Dependency injection with singleton and transient bindings |
 | Service providers | Register/Boot lifecycle, built-in + custom providers |
-| Configuration | `.env` loading via godotenv, Viper for YAML/JSON/TOML |
+| Configuration | `.env` loading via godotenv |
 | Environment detection | Development, production, testing modes |
 | Logging | Structured JSON logging via `log/slog` |
 | Error handling | Centralized error middleware with JSON/HTML responses |
@@ -107,23 +107,23 @@ Provide a Go web framework that:
 | Docker | Multi-stage Dockerfile + docker-compose orchestration |
 | Build & run | Single binary entrypoint with graceful shutdown |
 
-### Advanced Features (Planned — Not In Current Scope)
+### Advanced Features (Shipped)
 
 | Feature | Status |
 |---|---|
-| Queue workers / background jobs | 🔮 Future |
-| Task scheduler / cron | 🔮 Future |
-| Plugin / module system | 🔮 Future |
-| GraphQL support | 🔮 Future |
-| Admin panel scaffolding | 🔮 Future |
-| API versioning | 🔮 Future |
-| WebSocket rooms / channels | 🔮 Future |
-| OAuth2 / social login | 🔮 Future |
-| Two-factor authentication (TOTP) | 🔮 Future |
-| Audit logging | 🔮 Future |
-| Soft deletes | 🔮 Future |
-| Database read/write splitting | 🔮 Future |
-| Prometheus metrics | 🔮 Future |
+| Queue workers / background jobs | ✅ Shipped |
+| Task scheduler / cron | ✅ Shipped |
+| Plugin / module system | ✅ Shipped |
+| GraphQL support | ✅ Shipped |
+| Admin panel scaffolding | ✅ Shipped |
+| API versioning | ✅ Shipped |
+| WebSocket rooms / channels | ✅ Shipped |
+| OAuth2 / social login | ✅ Shipped |
+| Two-factor authentication (TOTP) | ✅ Shipped |
+| Audit logging | ✅ Shipped |
+| Soft deletes | ✅ Shipped |
+| Database read/write splitting | ✅ Shipped |
+| Prometheus metrics | ✅ Shipped |
 
 ---
 
@@ -131,11 +131,11 @@ Provide a Go web framework that:
 
 | Component | Library | Import Path |
 |---|---|---|
-| Language | Go | 1.21+ |
+| Language | Go | 1.25+ |
 | HTTP Router | Gin | `github.com/gin-gonic/gin` |
 | ORM | GORM | `gorm.io/gorm` |
 | CLI | Cobra | `github.com/spf13/cobra` |
-| Configuration | Viper / godotenv | `github.com/spf13/viper` / `github.com/joho/godotenv` |
+| Configuration | godotenv | `github.com/joho/godotenv` |
 | JWT | golang-jwt | `github.com/golang-jwt/jwt/v5` |
 | WebSocket | coder/websocket | `github.com/coder/websocket` |
 | Redis | go-redis | `github.com/redis/go-redis/v9` |
@@ -147,6 +147,12 @@ Provide a Go web framework that:
 | Logging | slog | `log/slog` (standard library) |
 | Validation | validator | `github.com/go-playground/validator/v10` |
 | Password Hashing | bcrypt | `golang.org/x/crypto/bcrypt` |
+| Task Scheduler | robfig/cron | `github.com/robfig/cron/v3` |
+| TOTP | pquerna/otp | `github.com/pquerna/otp` |
+| GraphQL | graphql-go | `github.com/graphql-go/graphql` |
+| OAuth2 | x/oauth2 | `golang.org/x/oauth2` |
+| Metrics | prometheus | `github.com/prometheus/client_golang` |
+| UUID | google/uuid | `github.com/google/uuid` |
 
 ---
 
@@ -197,21 +203,34 @@ yourframework/
 │   └── main.go
 ├── core/                       # Framework internals
 │   ├── app/                    # Application container & lifecycle
-│   ├── container/              # Service container (DI)
-│   ├── router/                 # Router engine setup
-│   ├── middleware/             # Middleware definitions & registry
-│   ├── config/                 # Config loader (.env / YAML)
-│   ├── logger/                 # Structured logging
-│   ├── errors/                 # Error types & middleware
-│   ├── session/                # Session manager & store backends
-│   ├── validation/             # Validation engine
-│   ├── crypto/                 # Hashing, encryption, tokens
+│   ├── audit/                  # Audit logging
+│   ├── auth/                   # JWT authentication
 │   ├── cache/                  # Cache manager
-│   ├── mail/                   # Email sender
+│   ├── cli/                    # CLI commands (Cobra)
+│   ├── config/                 # Config loader (.env)
+│   ├── container/              # Service container (DI)
+│   ├── crypto/                 # Hashing, encryption, tokens
+│   ├── errors/                 # Error types & middleware
 │   ├── events/                 # Event dispatcher & listeners
+│   ├── graphql/                # GraphQL handler & playground
+│   ├── health/                 # Health check endpoint
 │   ├── i18n/                   # Localization / translations
+│   ├── logger/                 # Structured logging
+│   ├── mail/                   # Email sender
+│   ├── metrics/                # Prometheus metrics
+│   ├── middleware/             # Middleware definitions & registry
+│   ├── oauth/                  # OAuth2 / social login providers
+│   ├── plugin/                 # Plugin / module system
+│   ├── queue/                  # Queue workers / background jobs
+│   ├── router/                 # Router engine, groups, resources
+│   ├── scheduler/              # Task scheduler / cron
 │   ├── server/                 # HTTP server & Caddy integration
-│   └── websocket/              # WebSocket upgrader & hub
+│   ├── service/                # Service mode (multi-port serving)
+│   ├── session/                # Session manager & store backends
+│   ├── storage/                # File storage (local, S3)
+│   ├── totp/                   # Two-factor authentication (TOTP)
+│   ├── validation/             # Validation engine
+│   └── websocket/              # WebSocket upgrader, hub & rooms
 ├── database/
 │   ├── connection.go           # DB connection factory
 │   ├── migrations/             # Migration files
@@ -219,16 +238,25 @@ yourframework/
 │   ├── models/                 # GORM model structs
 │   └── querybuilder/           # Query builder helpers
 ├── app/
+│   ├── helpers/                # Utility functions
+│   ├── jobs/                   # Queue job definitions
+│   ├── plugins.go              # Plugin registration
 │   ├── providers/              # Service providers
-│   ├── services/               # Business logic
-│   └── helpers/                # Utility functions
+│   ├── schedule/               # Scheduled task definitions
+│   └── services/               # Business logic
 ├── http/
 │   ├── controllers/            # Request handlers
+│   │   └── admin/              # Admin panel controllers (scaffolded)
 │   ├── requests/               # Validation structs
 │   └── responses/              # Response helpers
 ├── routes/
 │   ├── web.go                  # Web (HTML) routes
-│   └── api.go                  # API routes
+│   ├── api.go                  # API routes
+│   └── ws.go                   # WebSocket routes
+├── plugins/
+│   └── example/                # Example plugin demo
+├── testing/
+│   └── testutil/               # Test helper utilities
 ├── resources/
 │   ├── views/                  # HTML templates
 │   ├── lang/                   # Translation files
@@ -242,7 +270,7 @@ yourframework/
 │   ├── unit/
 │   └── integration/
 ├── docs/                       # This documentation
-├── .env
+├── .env.example                # Environment config template (copy to .env)
 ├── go.mod
 └── go.sum
 ```
@@ -257,21 +285,7 @@ Everything listed in the **Target Capabilities** section above. This is the scop
 
 ### Out of Scope (Not Now)
 
-| Item | Reason |
-|---|---|
-| Queue workers / background jobs | Planned for future — not in initial release |
-| Task scheduler / cron | Planned for future |
-| GraphQL | Planned for future |
-| OAuth2 / social login | Planned for future |
-| Admin panel scaffolding | Planned for future |
-| Plugin system (dynamic loading) | Planned for future |
-| Two-factor auth (TOTP) | Planned for future |
-| Prometheus metrics | Planned for future |
-| Database read/write splitting | Planned for future |
-| API versioning | Planned for future |
-| WebSocket rooms / channels | Planned for future |
-| Audit logging | Planned for future |
-| Soft deletes | Planned for future |
+All planned features (Phases 1–6) have been shipped. No features are currently out of scope.
 
 ### Non-Goals
 
