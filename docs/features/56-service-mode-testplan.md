@@ -144,7 +144,7 @@
 | **File** | `core/server/server_test.go` |
 | **Steps** | 1. Create two `ServiceConfig` (api on :0, ws on :0 — random ports). 2. Start `ListenAndServeMulti` in goroutine. 3. HTTP GET both ports → get responses. 4. Send SIGINT → both shut down. |
 | **Expected** | Both servers respond. Both shut down gracefully. |
-| **Notes** | Use `:0` for random port to avoid conflicts in CI. |
+| **Notes** | Use `:0` for random port to avoid conflicts in CI. `ListenAndServeMulti` uses `signal.NotifyContext` internally — existing server tests avoid calling `ListenAndServe` directly for this reason and test `http.Server` start/stop directly. Follow the same pattern here, or accept a `context.Context` parameter for testability. |
 
 ---
 

@@ -305,13 +305,14 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start the HTTP server",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Load .env so RAPIDGO_MODE can be read from .env file
+		config.Load()
+
 		// Resolve mode: CLI flag > env var > default "all"
 		modeStr := config.Env("RAPIDGO_MODE", "all")
 		if serveMode != "" {
 			modeStr = serveMode
 		}
-		// Must load config first to read env
-		config.Load()
 
 		mode, err := service.ParseMode(modeStr)
 		if err != nil {
