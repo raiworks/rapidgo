@@ -57,7 +57,18 @@ func (s *UserService) Update(id uint, updates map[string]interface{}) (*models.U
 	return &user, nil
 }
 
-// Delete deletes a user by ID.
+// Delete soft-deletes a user by ID (sets deleted_at timestamp).
 func (s *UserService) Delete(id uint) error {
 	return s.DB.Delete(&models.User{}, id).Error
+}
+
+// HardDelete permanently removes a user from the database.
+// This bypasses soft delete and cannot be undone.
+func (s *UserService) HardDelete(id uint) error {
+	return s.DB.Unscoped().Delete(&models.User{}, id).Error
+}
+
+// Restore recovers a soft-deleted user by clearing their deleted_at timestamp.
+func (s *UserService) Restore(id uint) error {
+	return s.DB.Unscoped().Model(&models.User{}).Where("id = ?", id).Update("deleted_at", nil).Error
 }

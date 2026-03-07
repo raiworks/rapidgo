@@ -130,7 +130,7 @@ func TestUpdate_NotFound_ReturnsError(t *testing.T) {
 	}
 }
 
-// TC-08: Delete removes user from database
+// TC-08 / T12: Delete soft-deletes user (hidden from normal queries, still exists via Unscoped)
 func TestDelete_RemovesUser(t *testing.T) {
 	db := setupTestDB(t)
 	svc := NewUserService(db)
@@ -142,8 +142,130 @@ func TestDelete_RemovesUser(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	// Normal query should not find the user
 	_, err = svc.GetByID(created.ID)
 	if err == nil {
-		t.Fatal("expected error after delete, user should not exist")
+		t.Fatal("expected error after soft delete, user should not be visible")
+	}
+
+	// Unscoped query should still find the user
+	var user models.User
+	if err := db.Unscoped().First(&user, created.ID).Error; err != nil {
+		t.Fatalf("expected soft-deleted user to exist via Unscoped, got: %v", err)
+	}
+}
+
+// T06: Delete sets deleted_at timestamp
+func TestDelete_SoftDeletesUser(t *testing.T) {
+	db := setupTestDB(t)
+	svc := NewUserService(db)
+
+	created, _ := svc.Create("Alice", "alice@example.com", "pass")
+
+	err := svc.Delete(created.ID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var user models.User
+	db.Unscoped().First(&user, created.ID)
+	if !user.DeletedAt.Valid {
+		t.Fatal("expected DeletedAt to be set after soft delete")
+	}
+}
+
+// T07: Delete sets a non-zero deleted_at timestamp
+func TestDelete_SetsDeletedAtTimestamp(t *testing.T) {
+	db := setupTestDB(t)
+	svc := NewUserService(db)
+
+	created, _ := svc.Create("Alice", "alice@example.com", "pass")
+
+	if err := svc.Delete(created.ID); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var user models.User
+	db.Unscoped().First(&user, created.ID)
+	if !user.DeletedAt.Valid {
+		t.Fatal("expected DeletedAt to be valid")
+	}
+	if user.DeletedAt.Time.IsZero() {
+		t.Fatal("expected DeletedAt timestamp to be non-zero")
+	}
+}
+
+// T08: HardDelete permanently removes user
+func TestHardDelete_PermanentlyRemovesUser(t *testing.T) {
+	db := setupTestDB(t)
+	svc := NewUserService(db)
+
+	created, _ := svc.Create("Alice", "alice@example.com", "pass")
+
+	err := svc.HardDelete(created.ID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var user models.User
+	err = db.Unscoped().First(&user, created.ID).Error
+	if err == nil {
+		t.Fatal("expected hard-deleted user to not exist even with Unscoped")
+	}
+}
+
+// T09: HardDelete on non-existent ID returns no error
+func TestHardDelete_NonExistentID_NoError(t *testing.T) {
+	db := setupTestDB(t)
+	svc := NewUserService(db)
+
+	err := svc.HardDelete(9999)
+	if err != nil {
+		t.Fatalf("expected no error for non-existent ID, got: %v", err)
+	}
+}
+
+// T10: Restore recovers a soft-deleted user
+func TestRestore_RecoversSoftDeletedUser(t *testing.T) {
+	db := setupTestDB(t)
+	svc := NewUserService(db)
+
+	created, _ := svc.Create("Alice", "alice@example.com", "pass")
+
+	// Soft-delete then restore
+	svc.Delete(created.ID)
+	err := svc.Restore(created.ID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should be visible again via normal query
+	user, err := svc.GetByID(created.ID)
+	if err != nil {
+		t.Fatalf("expected restored user to be queryable, got: %v", err)
+	}
+	if user.DeletedAt.Valid {
+		t.Fatal("expected restored user to have nil DeletedAt")
+	}
+}
+
+// T11: Restore on active user is a no-op
+func TestRestore_NonDeletedUser_NoError(t *testing.T) {
+	db := setupTestDB(t)
+	svc := NewUserService(db)
+
+	created, _ := svc.Create("Alice", "alice@example.com", "pass")
+
+	err := svc.Restore(created.ID)
+	if err != nil {
+		t.Fatalf("expected no error for restoring active user, got: %v", err)
+	}
+
+	user, err := svc.GetByID(created.ID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if user.Name != "Alice" {
+		t.Fatalf("expected 'Alice', got '%s'", user.Name)
 	}
 }
