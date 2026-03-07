@@ -119,8 +119,8 @@
 - [x] `go test ./... -count=1` — all packages pass
 - [x] Default mode (`all`) behavior identical to pre-feature
 - [x] Final commit with descriptive message
-- [ ] Push to feature branch
-- [ ] Merge to `main`
-- [ ] Push `main`
+- [x] Push to feature branch
+- [x] Merge to `main`
+- [x] Push `main`
 - [x] **Keep the feature branch**
-- [ ] Create review doc → `56-service-mode-review.md`
+- [x] Create review doc → `56-service-mode-review.md`
