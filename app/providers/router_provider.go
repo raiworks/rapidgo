@@ -23,11 +23,11 @@ func (p *RouterProvider) Register(c *container.Container) {
 func (p *RouterProvider) Boot(c *container.Container) {
 	r := container.MustMake[*router.Router](c, "router")
 
-	// Template engine setup — only if views directory has templates
+	// Template engine setup — only if views directory exists
 	r.SetFuncMap(router.DefaultFuncMap())
-	pattern := filepath.Join("resources", "views", "**", "*")
-	if matches, _ := filepath.Glob(pattern); len(matches) > 0 {
-		r.LoadTemplates(pattern)
+	viewsDir := filepath.Join("resources", "views")
+	if info, err := os.Stat(viewsDir); err == nil && info.IsDir() {
+		r.LoadTemplates(viewsDir)
 	}
 
 	// Static file serving

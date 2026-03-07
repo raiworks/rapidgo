@@ -2,7 +2,11 @@ package router
 
 import (
 	"html/template"
+	"io/fs"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/RAiWorks/RGo/core/config"
 	"github.com/gin-gonic/gin"
@@ -88,9 +92,24 @@ func (r *Router) SetFuncMap(funcMap template.FuncMap) {
 	r.engine.SetFuncMap(funcMap)
 }
 
-// LoadTemplates loads HTML templates matching the glob pattern.
-func (r *Router) LoadTemplates(pattern string) {
-	r.engine.LoadHTMLGlob(pattern)
+// LoadTemplates recursively loads all .html templates from the given directory.
+func (r *Router) LoadTemplates(dir string) {
+	tmpl := template.New("").Funcs(r.engine.FuncMap)
+	filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(path, ".html") {
+			name := filepath.ToSlash(path[len(dir)+1:])
+			b, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return nil
+			}
+			template.Must(tmpl.New(name).Parse(string(b)))
+		}
+		return nil
+	})
+	r.engine.SetHTMLTemplate(tmpl)
 }
 
 // Static serves files from a local directory under the given URL path.

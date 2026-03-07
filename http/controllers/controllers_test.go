@@ -54,7 +54,7 @@ func TestHome_RendersHTML(t *testing.T) {
 	dir := testTemplateDir(t)
 
 	r := router.New()
-	r.LoadTemplates(filepath.Join(dir, "*"))
+	r.LoadTemplates(dir)
 	r.Get("/", controllers.Home)
 
 	w := httptest.NewRecorder()

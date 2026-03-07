@@ -40,7 +40,7 @@ func TestLoadTemplates_RenderHTML(t *testing.T) {
 	}
 
 	r := newTestRouter()
-	r.LoadTemplates(filepath.Join(dir, "*"))
+	r.LoadTemplates(dir)
 	r.Get("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "test.html", gin.H{"title": "Hello"})
 	})
