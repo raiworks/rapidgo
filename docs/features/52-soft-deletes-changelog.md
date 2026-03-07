@@ -1,9 +1,9 @@
 # 📝 Changelog: Soft Deletes
 
 > **Feature**: `52` — Soft Deletes
-> **Status**: 🟡 IN PROGRESS
-> **Date**: 2026-03-08
-> **Commit**: _pending_
+> **Status**: � COMPLETE
+> **Date**: 2026-03-07
+> **Commit**: `6c9f91f`
 
 ---
 

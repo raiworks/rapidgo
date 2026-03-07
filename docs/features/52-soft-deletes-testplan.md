@@ -2,8 +2,8 @@
 
 > **Feature**: `52` — Soft Deletes
 > **Tasks**: [`52-soft-deletes-tasks.md`](52-soft-deletes-tasks.md)
-> **Status**: 🟡 IN PROGRESS
-> **Date**: 2026-03-08
+> **Status**: � COMPLETE
+> **Date**: 2026-03-07
 
 ---
 

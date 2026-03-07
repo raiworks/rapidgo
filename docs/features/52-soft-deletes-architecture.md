@@ -2,8 +2,8 @@
 
 > **Feature**: `52` — Soft Deletes
 > **Discussion**: [`52-soft-deletes-discussion.md`](52-soft-deletes-discussion.md)
-> **Status**: 🟡 IN PROGRESS
-> **Date**: 2026-03-08
+> **Status**: � COMPLETE
+> **Date**: 2026-03-07
 
 ---
 

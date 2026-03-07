@@ -2,8 +2,8 @@
 
 > **Feature**: `52` — Soft Deletes
 > **Architecture**: [`52-soft-deletes-architecture.md`](52-soft-deletes-architecture.md)
-> **Status**: 🟡 IN PROGRESS
-> **Date**: 2026-03-08
+> **Status**: � COMPLETE
+> **Date**: 2026-03-07
 
 ---
 
