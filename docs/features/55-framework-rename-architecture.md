@@ -184,24 +184,31 @@ database/
 ├── transaction_test.go              # MODIFY — imports
 ├── transaction_example.go           # MODIFY — imports
 ├── models/
-│   └── user.go                      # MODIFY — imports
+│   ├── user.go                      # MODIFY — imports
+│   ├── base.go                      # NO CHANGE — no module imports
+│   ├── post.go                      # NO CHANGE — no module imports
+│   ├── registry.go                  # NO CHANGE — no module imports
+│   └── models_test.go              # NO CHANGE — no module imports (uses sqlite/gorm only)
 ├── migrations/
-│   └── *.go                         # MODIFY — imports (if any)
+│   ├── migrator.go                  # MODIFY — imports (if any)
+│   └── migrations_test.go           # MODIFY — imports (if any)
 ├── querybuilder/
 │   └── *.go                         # MODIFY — imports (if any)
 └── seeders/
+    ├── seeder.go                    # NO CHANGE — no module imports (uses fmt/gorm only)
     ├── user_seeder.go               # MODIFY — imports
     └── seeders_test.go              # MODIFY — imports
 
 http/
 ├── controllers/
 │   ├── home_controller.go           # MODIFY — "Welcome to RGo" → "Welcome to RapidGo"
-│   └── controllers_test.go          # MODIFY — imports, "Welcome to RGo" assertions
+│   ├── controllers_test.go          # MODIFY — imports, "Welcome to RGo" assertions
+│   └── post_controller.go          # NO CHANGE — no module imports (uses net/http + gin only)
 ├── requests/
 │   └── *.go                         # MODIFY — imports (if any)
 └── responses/
     ├── response.go                  # MODIFY — imports
-    └── response_test.go             # MODIFY — imports, "RGo" test data
+    └── response_test.go             # MODIFY — imports, "RGo" test data → "RapidGo"
 
 routes/
 ├── web.go                           # MODIFY — imports
@@ -209,7 +216,8 @@ routes/
 
 testing/
 └── testutil/
-    └── testutil.go                  # MODIFY — imports
+    ├── testutil.go                  # MODIFY — imports
+    └── testutil_test.go             # NO CHANGE — no module imports (uses net/http + testing only)
 
 tests/
 ├── integration/

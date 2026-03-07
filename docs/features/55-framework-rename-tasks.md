@@ -44,7 +44,7 @@
   - [ ] `http/controllers/controllers_test.go` — `"Welcome to RGo"` → `"Welcome to RapidGo"`
   - [ ] `core/cli/cli_test.go` — `"RGo"` test assertion → `"RapidGo"`
   - [ ] `database/database_test.go` — `"rgo_dev"` → `"rapidgo_dev"`
-  - [ ] `http/responses/response_test.go` — `"name": "RGo"` — evaluate if needs change (test data)
+  - [ ] `http/responses/response_test.go` — `"name": "RGo"` → `"name": "RapidGo"` (sample data, rename for consistency)
 - [ ] **A.8** — Update database defaults (`database/connection.go`)
   - [ ] `config.Env("DB_NAME", "rgo_dev")` → `config.Env("DB_NAME", "rapidgo_dev")`
 - [ ] 📍 **Checkpoint A** — `go build ./...` compiles with zero errors
@@ -68,7 +68,7 @@
   - [ ] Binary stays as `server` (no change needed)
 - [ ] **B.4** — Update `Caddyfile`
   - [ ] `# RGo Framework` → `# RapidGo Framework`
-- [ ] **B.5** — Update `.gitignore` if binary name is referenced
+- [ ] **B.5** — ~~Update `.gitignore` if binary name is referenced~~ **NO-OP** — `.gitignore` uses `bin/` (whole directory), not `bin/rgo`
 - [ ] **B.6** — Create `LICENSE` file
   - [ ] MIT License with `Copyright (c) 2026 RAi Works (https://rai.works)`
 - [ ] **B.7** — Run `go mod tidy` to regenerate `go.sum`
