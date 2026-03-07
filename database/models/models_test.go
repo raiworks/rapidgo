@@ -22,6 +22,7 @@ func TestBaseModel_Fields(t *testing.T) {
 		{"ID", "uint"},
 		{"CreatedAt", "time.Time"},
 		{"UpdatedAt", "time.Time"},
+		{"DeletedAt", "gorm.DeletedAt"},
 	}
 
 	for _, c := range checks {

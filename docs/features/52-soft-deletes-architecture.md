@@ -155,9 +155,9 @@ func init() {
 ```
 
 **Notes**:
-- `IF NOT EXISTS` / `IF EXISTS` guards for idempotent execution
+- GORM Migrator API handles database-specific SQL generation for portability
 - Column + index for both `users` and `posts` tables
-- Down migration drops index first, then column
+- Down migration drops columns for both tables
 
 ---
 
