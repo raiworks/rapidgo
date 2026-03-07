@@ -1,7 +1,7 @@
 # 🧪 Test Plan: WebSocket Rooms / Channels
 
 > **Feature**: `48` — WebSocket Rooms / Channels
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **File**: `core/websocket/hub_test.go`
 > **Date**: 2026-03-07
 

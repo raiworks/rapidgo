@@ -1,7 +1,7 @@
 # 🏗️ Architecture: WebSocket Rooms / Channels
 
 > **Feature**: `48` — WebSocket Rooms / Channels
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Package**: `core/websocket`
 > **Date**: 2026-03-07
 
