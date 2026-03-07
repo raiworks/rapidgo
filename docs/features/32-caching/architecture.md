@@ -70,7 +70,7 @@ type memCacheEntry struct {
 | Var | Default | Purpose |
 |-----|---------|---------|
 | `CACHE_DRIVER` | `memory` | Backend driver name |
-| `CACHE_PREFIX` | `rgo_` | Key prefix for namespacing |
+| `CACHE_PREFIX` | `rapidgo_` | Key prefix for namespacing |
 | `CACHE_TTL` | `3600` | Default TTL in seconds (informational; callers pass explicit TTL) |
 
 ## Usage

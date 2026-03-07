@@ -80,7 +80,7 @@ func NewDBConfig() DBConfig {
 		Driver:          config.Env("DB_DRIVER", ""),
 		Host:            config.Env("DB_HOST", "localhost"),
 		Port:            config.Env("DB_PORT", "5432"),
-		Name:            config.Env("DB_NAME", "rgo_dev"),
+		Name:            config.Env("DB_NAME", "rapidgo_dev"),
 		User:            config.Env("DB_USER", ""),
 		Password:        config.Env("DB_PASSWORD", ""),
 		SSLMode:         config.Env("DB_SSL_MODE", "disable"),
@@ -297,7 +297,7 @@ application.Register(&providers.RouterProvider{})       // 5. Router — creates
 | `DB_DRIVER` | (empty) | Database driver: `postgres`, `mysql`, or `sqlite` |
 | `DB_HOST` | `localhost` | Database host |
 | `DB_PORT` | `5432` | Database port |
-| `DB_NAME` | `rgo_dev` | Database name (or SQLite file path) |
+| `DB_NAME` | `rapidgo_dev` | Database name (or SQLite file path) |
 | `DB_USER` | (empty) | Database username |
 | `DB_PASSWORD` | (empty) | Database password |
 | `DB_SSL_MODE` | `disable` | PostgreSQL SSL mode |

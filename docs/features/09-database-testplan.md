@@ -63,7 +63,7 @@
 | 3 | Assert `cfg.Driver == ""` | Empty (forces explicit config) |
 | 4 | Assert `cfg.Host == "localhost"` | Default |
 | 5 | Assert `cfg.Port == "5432"` | Default |
-| 6 | Assert `cfg.Name == "rgo_dev"` | Default |
+| 6 | Assert `cfg.Name == "rapidgo_dev"` | Default |
 | 7 | Assert `cfg.MaxOpenConns == 25` | Default |
 | 8 | Assert `cfg.MaxIdleConns == 10` | Default |
 | 9 | Assert `cfg.ConnMaxLifetime == 5 * time.Minute` | Default |

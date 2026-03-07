@@ -207,7 +207,7 @@ APP_URL=http://localhost:8080
 DB_DRIVER=postgres
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=rgo_dev
+DB_NAME=rapidgo_dev
 DB_USER=postgres
 DB_PASSWORD=secret
 DB_SSL_MODE=disable
@@ -219,7 +219,7 @@ SESSION_SECRET=change-me-to-a-random-string
 
 # --- Cache ---
 CACHE_DRIVER=memory
-CACHE_PREFIX=rgo_
+CACHE_PREFIX=rapidgo_
 
 # --- Redis ---
 REDIS_HOST=localhost
