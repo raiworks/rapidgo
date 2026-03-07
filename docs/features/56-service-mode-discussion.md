@@ -1,11 +1,11 @@
 # 💬 Discussion: Service Mode Architecture
 
 > **Feature**: `56` — Service Mode Architecture
-> **Status**: 🟡 IN PROGRESS
+> **Status**: � COMPLETE
 > **Branch**: `feature/56-service-mode`
-> **Depends On**: #55 (Framework Rename — all references should use new name)
+> **Depends On**: #55 (Framework Rename — ✅ Complete)
 > **Date Started**: 2026-03-07
-> **Date Completed**: —
+> **Date Completed**: 2026-03-07
 
 ---
 
@@ -38,8 +38,8 @@ cmd/main.go → cli.Execute() → serve command → NewApp()
 NewApp() registers ALL 6 providers (no choice):
     1. ConfigProvider      → loads .env
     2. LoggerProvider      → sets up slog
-    3. DatabaseProvider    → registers "db" singleton
-    4. SessionProvider     → registers "session" (REQUIRES "db")
+    3. DatabaseProvider    → registers "db" singleton (LAZY — connects on first resolve)
+    4. SessionProvider     → registers "session" (LAZY — REQUIRES "db" on first resolve)
     5. MiddlewareProvider  → registers global middleware maps
     6. RouterProvider      → creates ONE router, registers ALL routes
     ↓
@@ -50,7 +50,7 @@ serve command → extracts "router" → server.ListenAndServe(:8080)
 
 **Key files**:
 - `core/cli/root.go` — `NewApp()` with hardcoded provider list
-- `app/providers/session_provider.go` — panics without DB (`MustMake[*gorm.DB]`)
+- `app/providers/session_provider.go` — panics without DB (`MustMake[*gorm.DB]`) — note: lazy singleton, panic occurs on first resolve, not at registration
 - `app/providers/router_provider.go` — always calls both `RegisterWeb()` and `RegisterAPI()`
 - `core/cli/serve.go` — single server on single port
 - `core/middleware/registry.go` — package-level global maps
@@ -65,7 +65,7 @@ ConfigProvider ─────────────────────�
     │                                                 │
     ├──→ DatabaseProvider (reads DB_* from config)    │
     │         │                                       │
-    │         └──→ SessionProvider (HARD depends on DB — panics without it)
+    │         └──→ SessionProvider (LAZY hard dep on DB — panics on first Make("session"), not at boot)
     │                                                 │
     ├──→ MiddlewareProvider (independent)             │
     │                                                 │
@@ -184,7 +184,7 @@ The framework should focus on making the **application code** splittable, not re
 
 | Dependency | Type | Status |
 |---|---|---|
-| Feature #55 — Framework Rename | Feature | 🔴 Not started |
+| Feature #55 — Framework Rename | Feature | ✅ Done |
 | All 41 core features complete | Feature | ✅ Done |
 | Service Container (#05) | Feature | ✅ Done |
 | Service Providers (#06) | Feature | ✅ Done |
@@ -194,13 +194,13 @@ The framework should focus on making the **application code** splittable, not re
 
 ## Open Questions
 
-- [ ] **Q1**: Should Phases 1-5 each be separate Mastery features (with their own doc sets), or is this one feature with phased implementation? Recommendation: Phases 1-3 as one feature (#56), Phase 4 as #57, Phase 5 (Worker/Queue) as a separate feature (already listed as #42 in roadmap)
-- [ ] **Q2**: Should the `--mode` flag override `RAPIDGO_MODE` env var, or vice versa? Recommendation: CLI flag overrides env var (standard precedence)
-- [ ] **Q3**: For multi-port mode, should each service get its own container instance or share one? Recommendation: Shared container (simpler, same DB pool) with per-service routers
-- [ ] **Q4**: Should we support `RAPIDGO_MODE=api` as a build-time optimization (via Go build tags) to exclude web template code from the binary? Or runtime-only? Recommendation: Runtime-only for Phase 2-3, build tags as a future optimization
-- [ ] **Q5**: Does Phase 5 (Worker/Queue) overlap with roadmap item #42 (Queue Workers / Background Jobs)? Should they be merged? Recommendation: Yes — Phase 5 IS Feature #42
-- [ ] **Q6**: Should the `routes/` directory split into `routes/web.go`, `routes/api.go`, `routes/ws.go`? It already has `web.go` and `api.go` — do we just add `ws.go`?
-- [ ] **Q7**: When running in `web` mode only, should API middleware (like JSON content-type enforcement) be excluded from the middleware stack entirely?
+- [x] **Q1**: Should Phases 1-5 each be separate Mastery features (with their own doc sets), or is this one feature with phased implementation? **Decision**: Phases 1-3 = Feature #56 (this feature). Phase 4 (Remove Global State) = Feature #57. Phase 5 (Worker/Queue) = Feature #42 (already in roadmap).
+- [x] **Q2**: Should the `--mode` flag override `RAPIDGO_MODE` env var, or vice versa? **Decision**: CLI flag overrides env var. Standard 12-factor precedence: flag > env > default. Matches existing `--port` / `APP_PORT` pattern.
+- [x] **Q3**: For multi-port mode, should each service get its own container instance or share one? **Decision**: Shared container with per-service routers. One DB pool, one config, separate Gin engines per port. Simpler and less memory.
+- [x] **Q4**: Should we support `RAPIDGO_MODE=api` as a build-time optimization (via Go build tags) to exclude web template code from the binary? Or runtime-only? **Decision**: Runtime-only for #56. Build tags are a future optimization — runtime mode selection is simpler, testable, and covers all deployment scenarios.
+- [x] **Q5**: Does Phase 5 (Worker/Queue) overlap with roadmap item #42 (Queue Workers / Background Jobs)? Should they be merged? **Decision**: Yes — Phase 5 IS Feature #42. No duplication.
+- [x] **Q6**: Should the `routes/` directory split into `routes/web.go`, `routes/api.go`, `routes/ws.go`? It already has `web.go` and `api.go` — do we just add `ws.go`? **Decision**: Yes, add `routes/ws.go` with `RegisterWS()` following the same pattern. RouterProvider calls it conditionally based on mode.
+- [x] **Q7**: When running in `web` mode only, should API middleware (like JSON content-type enforcement) be excluded from the middleware stack entirely? **Decision**: Yes. Each mode loads only its relevant middleware. Web mode skips JSON enforcement. API mode skips CSRF. MiddlewareProvider becomes mode-aware.
 
 ## Comparison with Other Frameworks
 
@@ -210,7 +210,7 @@ The framework should focus on making the **application code** splittable, not re
 | Optional providers | ✅ | ✅ (profiles) | ✅ (modules) | ❌ | ✅ Phase 1 |
 | Service modes | ✅ (artisan) | ✅ (profiles) | ✅ (modules) | ❌ | ✅ Phase 2 |
 | Multi-port | ❌ | ✅ | ✅ | ❌ | ✅ Phase 3 |
-| Background workers | ✅ (queues) | ✅ | ✅ (bull) | ❌ | ✅ Phase 5 |
+| Background workers | ✅ (queues) | ✅ | ✅ (bull) | ❌ | 🔮 Feature #42 |
 | Microservice toolkit | ⚠️ Lumen | ✅ (cloud) | ✅ | ❌ | ✅ Phase 2-3 |
 
 ## Decisions Made
@@ -221,6 +221,13 @@ The framework should focus on making the **application code** splittable, not re
 | 2026-03-07 | Framework should NOT build infra (service discovery, load balancing, etc.) | Better solved by Kubernetes/Consul/Nginx — framework focuses on app code splittability |
 | 2026-03-07 | 5-phase implementation plan proposed | Each phase independently shippable, ordered by impact/effort ratio |
 | 2026-03-07 | Depends on #55 (Rename) completing first | Avoid renaming new service mode code after the fact |
+| 2026-03-07 | Feature scope: Phases 1-3 only (#56). Phase 4 → #57, Phase 5 → #42 | Keep features focused and independently shippable |
+| 2026-03-07 | CLI flag overrides env var | Standard 12-factor precedence (flag > env > default) |
+| 2026-03-07 | Shared container, per-service routers for multi-port | One DB pool, separate route trees, simpler architecture |
+| 2026-03-07 | Runtime-only mode selection (no build tags) | Simpler, testable, build tags deferred as future optimization |
+| 2026-03-07 | Phase 5 (Worker/Queue) = Feature #42 | Already in roadmap, no duplication |
+| 2026-03-07 | Add `routes/ws.go` with `RegisterWS()` | Follows existing web.go / api.go pattern |
+| 2026-03-07 | Mode-aware middleware loading | Each mode loads only relevant middleware stack |
 
 ---
 
@@ -228,6 +235,6 @@ The framework should focus on making the **application code** splittable, not re
 
 <!-- Fill this section when ALL open questions are resolved -->
 
-**Summary**: —
-**Completed**: —
-**Next**: Resolve open questions → then create architecture doc → `56-service-mode-architecture.md`
+**Summary**: Enable service mode architecture (Phases 1-3) — optional providers, `RAPIDGO_MODE` env var / `--mode` CLI flag for selecting web/api/ws/all modes, and multi-port serving with per-service routers sharing one container. Default mode `all` preserves full backward compatibility. Phase 4 (global state removal) deferred to #57, Phase 5 (worker/queue) deferred to #42.
+**Completed**: 2026-03-07
+**Next**: Create architecture doc → `56-service-mode-architecture.md`
