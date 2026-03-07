@@ -30,6 +30,7 @@ func init() {
 	rootCmd.AddCommand(makeModelCmd)
 	rootCmd.AddCommand(makeServiceCmd)
 	rootCmd.AddCommand(makeProviderCmd)
+	rootCmd.AddCommand(workCmd)
 }
 
 // Execute runs the root command. Called from main().
@@ -53,6 +54,10 @@ func NewApp(mode service.Mode) *app.App {
 	if mode.Has(service.ModeWeb) || mode.Has(service.ModeAPI) || mode.Has(service.ModeWS) {
 		application.Register(&providers.DatabaseProvider{})
 	}
+
+	// Queue and Redis — lazy singletons, safe to register always
+	application.Register(&providers.RedisProvider{})
+	application.Register(&providers.QueueProvider{})
 
 	// Session only needed for web mode (cookie-based auth)
 	if mode.Has(service.ModeWeb) {
