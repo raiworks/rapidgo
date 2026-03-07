@@ -6,5 +6,6 @@ func All() []interface{} {
 	return []interface{}{
 		&User{},
 		&Post{},
+		&AuditLog{},
 	}
 }

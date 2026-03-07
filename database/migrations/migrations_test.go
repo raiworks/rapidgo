@@ -21,8 +21,8 @@ func setupTestDB(t *testing.T) *gorm.DB {
 // TC-01: models.All() returns all registered models.
 func TestModelsAll(t *testing.T) {
 	all := models.All()
-	if len(all) != 2 {
-		t.Fatalf("expected 2 models, got %d", len(all))
+	if len(all) != 3 {
+		t.Fatalf("expected 3 models, got %d", len(all))
 	}
 	// Verify types
 	if _, ok := all[0].(*models.User); !ok {
@@ -30,6 +30,9 @@ func TestModelsAll(t *testing.T) {
 	}
 	if _, ok := all[1].(*models.Post); !ok {
 		t.Fatal("expected second model to be *Post")
+	}
+	if _, ok := all[2].(*models.AuditLog); !ok {
+		t.Fatal("expected third model to be *AuditLog")
 	}
 }
 
