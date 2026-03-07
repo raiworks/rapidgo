@@ -1,7 +1,7 @@
 # 💬 Discussion: OAuth2 / Social Login
 
 > **Feature**: `49` — OAuth2 / Social Login
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Depends on**: Feature #21 (Authentication) — ✅ SHIPPED
 > **Date**: 2026-03-07
 
