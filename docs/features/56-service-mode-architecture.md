@@ -496,6 +496,13 @@ func applyRoutesForMode(r *router.Router, c *container.Container, m service.Mode
 	if m.Has(service.ModeWS) {
 		routes.RegisterWS(r)
 	}
+
+	// Health check — each per-service router gets its own health endpoints
+	if c.Has("db") {
+		health.Routes(r, func() *gorm.DB {
+			return container.MustMake[*gorm.DB](c, "db")
+		})
+	}
 }
 
 // allSamePort returns true if all services resolve to the same port.
@@ -578,6 +585,7 @@ main → Execute → serve --mode=api,ws
 | Shared container for multi-port | One DB pool, simple | Services can interfere | Independent containers deferred to #57 |
 | Mode passed via provider struct field | No provider interface changes | Providers now have state | Minimal change, Mode is read-only |
 | CSRF only in web mode | API doesn't need CSRF | Could be needed for API forms | APIs use token auth, not cookies |
+| Main router orphaned in multi-port | Simple — no special-case logic in Boot() | RouterProvider.Boot() registers routes on a container router that serveMulti() doesn't use | Acceptable waste — route registration is fast; cleaner than adding multi-port awareness to providers |
 | Session only in web mode | Lighter API mode | API can't use session-based auth by default | API should use JWT; if session needed, use mode=web,api |
 | Runtime mode (no build tags) | Simpler, one binary | Larger binary | Build tags deferred as future optimization |
 

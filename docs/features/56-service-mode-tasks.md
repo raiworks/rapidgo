@@ -14,8 +14,8 @@
 - [x] Architecture doc is FINALIZED
 - [ ] Feature branch created from latest `main`
 - [x] Dependent features are merged to `main` (#55 complete)
-- [ ] Test plan doc created
-- [ ] Changelog doc created (empty)
+- [x] Test plan doc created
+- [x] Changelog doc created (empty)
 
 ---
 
