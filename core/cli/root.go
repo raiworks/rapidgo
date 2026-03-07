@@ -42,6 +42,11 @@ func Execute() {
 	}
 }
 
+// RootCmd returns the root Cobra command, allowing plugins to add subcommands.
+func RootCmd() *cobra.Command {
+	return rootCmd
+}
+
 // NewApp creates and boots a RapidGo application configured for the given mode.
 // Used by commands that need the application lifecycle (serve, migrate, etc.).
 func NewApp(mode service.Mode) *app.App {
