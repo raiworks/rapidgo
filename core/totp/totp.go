@@ -37,6 +37,7 @@ func GenerateKey(issuer, account string) (*Key, error) {
 }
 
 // ValidateCode checks whether a TOTP code is valid for the given secret.
+// Uses a time window of ±1 period (30 seconds) for clock drift tolerance.
 func ValidateCode(secret, code string) bool {
 	return totp.Validate(code, secret)
 }
