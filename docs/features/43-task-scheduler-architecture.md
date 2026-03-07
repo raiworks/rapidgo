@@ -106,7 +106,7 @@ func (s *Scheduler) Run(ctx context.Context) error
 `Run()`:
 - Calls `s.cron.Start()` to begin the cron engine
 - Blocks on `<-ctx.Done()`
-- Calls `s.cron.Stop()` which waits for running jobs to complete
+- Calls `stopCtx := s.cron.Stop()` then `<-stopCtx.Done()` to wait for running jobs to complete
 - Returns nil (clean shutdown)
 
 ### Wrapped Task Execution
@@ -232,7 +232,7 @@ The `application` parameter gives tasks access to the container if they need to 
                 → fn(ctx) — user task executes
                 → log "task completed" or "task failed"
         → <-ctx.Done() — SIGINT/SIGTERM
-        → cron.Stop() — wait for running tasks
+        → stopCtx := cron.Stop(); <-stopCtx.Done() — wait for running tasks
         → return nil
 ```
 
