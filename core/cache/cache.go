@@ -2,8 +2,11 @@ package cache
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // Store defines the cache contract.
@@ -91,11 +94,27 @@ func (p *prefixStore) Flush() error {
 
 // NewStore creates a cache Store for the given driver.
 // If prefix is non-empty, all keys are automatically prefixed.
+//
+// Supported drivers: "memory", "file", "redis".
+// For "file": reads CACHE_FILE_PATH env (default: "storage/cache").
+// For "redis": reads REDIS_HOST, REDIS_PORT, REDIS_PASSWORD env.
 func NewStore(driver, prefix string) (Store, error) {
 	var store Store
 	switch driver {
 	case "memory":
 		store = NewMemoryCache()
+	case "file":
+		path := os.Getenv("CACHE_FILE_PATH")
+		if path == "" {
+			path = "storage/cache"
+		}
+		store = NewFileCache(path)
+	case "redis":
+		client, err := newRedisClient()
+		if err != nil {
+			return nil, err
+		}
+		store = NewRedisCache(client)
 	default:
 		return nil, fmt.Errorf("cache: unsupported driver %q", driver)
 	}
@@ -103,4 +122,21 @@ func NewStore(driver, prefix string) (Store, error) {
 		store = &prefixStore{store: store, prefix: prefix}
 	}
 	return store, nil
+}
+
+// newRedisClient creates a Redis client from env vars.
+func newRedisClient() (*redis.Client, error) {
+	host := os.Getenv("REDIS_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("REDIS_PORT")
+	if port == "" {
+		port = "6379"
+	}
+	password := os.Getenv("REDIS_PASSWORD")
+	return redis.NewClient(&redis.Options{
+		Addr:     host + ":" + port,
+		Password: password,
+	}), nil
 }

@@ -6,6 +6,9 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/alicebob/miniredis/v2"
+	"github.com/redis/go-redis/v9"
 )
 
 // --- MemoryStore ---
@@ -342,10 +345,16 @@ func TestNewStore_Unsupported(t *testing.T) {
 }
 
 func TestNewStore_Redis(t *testing.T) {
+	s := miniredis.RunT(t)
 	t.Setenv("SESSION_DRIVER", "redis")
-	_, err := NewStore(nil)
-	if err == nil {
-		t.Fatal("expected error for redis driver")
+	t.Setenv("REDIS_HOST", s.Host())
+	t.Setenv("REDIS_PORT", s.Port())
+	store, err := NewStore(nil)
+	if err != nil {
+		t.Fatalf("expected redis store, got error: %v", err)
+	}
+	if _, ok := store.(*RedisStore); !ok {
+		t.Fatalf("expected *RedisStore, got %T", store)
 	}
 }
 
@@ -357,5 +366,85 @@ func TestNewStore_Default(t *testing.T) {
 	}
 	if _, ok := store.(*MemoryStore); !ok {
 		t.Fatal("expected *MemoryStore as default")
+	}
+}
+
+// --- RedisStore ---
+
+func newTestRedisStore(t *testing.T) (*RedisStore, *miniredis.Miniredis) {
+	t.Helper()
+	s := miniredis.RunT(t)
+	client := redis.NewClient(&redis.Options{Addr: s.Addr()})
+	return NewRedisStore(client, "test:"), s
+}
+
+func TestRedisStore_WriteRead(t *testing.T) {
+	store, _ := newTestRedisStore(t)
+	data := map[string]interface{}{"user": "redis-alice"}
+	if err := store.Write("s1", data, 10*time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	got, err := store.Read("s1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["user"] != "redis-alice" {
+		t.Fatalf("expected 'redis-alice', got %v", got["user"])
+	}
+}
+
+func TestRedisStore_ReadMissing(t *testing.T) {
+	store, _ := newTestRedisStore(t)
+	got, err := store.Read("nonexistent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected empty map, got %v", got)
+	}
+}
+
+func TestRedisStore_Destroy(t *testing.T) {
+	store, _ := newTestRedisStore(t)
+	store.Write("s1", map[string]interface{}{"k": "v"}, 10*time.Minute)
+	if err := store.Destroy("s1"); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := store.Read("s1")
+	if len(got) != 0 {
+		t.Fatal("expected empty map after destroy")
+	}
+}
+
+func TestRedisStore_GC(t *testing.T) {
+	store, _ := newTestRedisStore(t)
+	// GC is a no-op for Redis (TTL handles expiry) — just ensure it doesn't error.
+	if err := store.GC(10 * time.Minute); err != nil {
+		t.Fatalf("GC should not error: %v", err)
+	}
+}
+
+func TestRedisStore_TTLExpiry(t *testing.T) {
+	store, mr := newTestRedisStore(t)
+	store.Write("exp", map[string]interface{}{"k": "v"}, 2*time.Second)
+	// Fast-forward miniredis time
+	mr.FastForward(3 * time.Second)
+	got, err := store.Read("exp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Fatal("expected empty map after TTL expiry")
+	}
+}
+
+func TestRedisStore_Prefix(t *testing.T) {
+	s := miniredis.RunT(t)
+	client := redis.NewClient(&redis.Options{Addr: s.Addr()})
+	store := NewRedisStore(client, "myapp:")
+	store.Write("abc", map[string]interface{}{"k": "v"}, time.Minute)
+	// Key in Redis should be prefixed
+	if !s.Exists("myapp:abc") {
+		t.Fatal("expected key 'myapp:abc' to exist in Redis")
 	}
 }

@@ -162,3 +162,106 @@ func TestNewDriver_UnknownDriver(t *testing.T) {
 		t.Fatal("expected error for unknown driver")
 	}
 }
+
+// --- S3Driver ---
+
+// TC-13: S3 URL returns standard AWS S3 URL
+func TestS3Driver_URL_Standard(t *testing.T) {
+	d := &S3Driver{Bucket: "mybucket", Region: "us-east-1"}
+	url := d.URL("photos/cat.jpg")
+	expected := "https://mybucket.s3.us-east-1.amazonaws.com/photos/cat.jpg"
+	if url != expected {
+		t.Fatalf("URL = %q, want %q", url, expected)
+	}
+}
+
+// TC-14: S3 URL with custom endpoint returns endpoint-based URL
+func TestS3Driver_URL_CustomEndpoint(t *testing.T) {
+	d := &S3Driver{
+		Bucket:   "mybucket",
+		Region:   "us-east-1",
+		Endpoint: "https://minio.local:9000",
+	}
+	url := d.URL("docs/readme.pdf")
+	expected := "https://minio.local:9000/mybucket/docs/readme.pdf"
+	if url != expected {
+		t.Fatalf("URL = %q, want %q", url, expected)
+	}
+}
+
+// TC-15: S3 safePath rejects path traversal
+func TestS3Driver_SafePath_Traversal(t *testing.T) {
+	d := &S3Driver{Bucket: "b", Region: "r"}
+	_, err := d.safePath("../../etc/passwd")
+	if err == nil {
+		t.Fatal("expected error for path traversal")
+	}
+}
+
+// TC-16: S3 safePath rejects empty path
+func TestS3Driver_SafePath_Empty(t *testing.T) {
+	d := &S3Driver{Bucket: "b", Region: "r"}
+	_, err := d.safePath("")
+	if err == nil {
+		t.Fatal("expected error for empty path")
+	}
+}
+
+// TC-17: S3 safePath cleans valid paths
+func TestS3Driver_SafePath_Valid(t *testing.T) {
+	d := &S3Driver{Bucket: "b", Region: "r"}
+	got, err := d.safePath("photos/cat.jpg")
+	if err != nil {
+		t.Fatalf("safePath: %v", err)
+	}
+	if got != "photos/cat.jpg" {
+		t.Fatalf("safePath = %q, want %q", got, "photos/cat.jpg")
+	}
+}
+
+// TC-18: NewS3Driver fails without required env vars
+func TestNewS3Driver_MissingEnv(t *testing.T) {
+	t.Setenv("S3_BUCKET", "")
+	t.Setenv("S3_REGION", "")
+	t.Setenv("S3_KEY", "")
+	t.Setenv("S3_SECRET", "")
+	_, err := NewS3Driver()
+	if err == nil {
+		t.Fatal("expected error when S3 env vars missing")
+	}
+}
+
+// TC-19: NewS3Driver succeeds with env vars set
+func TestNewS3Driver_WithEnv(t *testing.T) {
+	t.Setenv("S3_BUCKET", "test-bucket")
+	t.Setenv("S3_REGION", "us-west-2")
+	t.Setenv("S3_KEY", "AKIATEST")
+	t.Setenv("S3_SECRET", "secret123")
+	t.Setenv("S3_ENDPOINT", "")
+	d, err := NewS3Driver()
+	if err != nil {
+		t.Fatalf("NewS3Driver: %v", err)
+	}
+	if d.Bucket != "test-bucket" {
+		t.Fatalf("Bucket = %q, want %q", d.Bucket, "test-bucket")
+	}
+	if d.Region != "us-west-2" {
+		t.Fatalf("Region = %q, want %q", d.Region, "us-west-2")
+	}
+}
+
+// TC-20: NewDriver returns S3Driver when STORAGE_DRIVER=s3
+func TestNewDriver_S3(t *testing.T) {
+	t.Setenv("STORAGE_DRIVER", "s3")
+	t.Setenv("S3_BUCKET", "test-bucket")
+	t.Setenv("S3_REGION", "us-east-1")
+	t.Setenv("S3_KEY", "AKIATEST")
+	t.Setenv("S3_SECRET", "secret123")
+	drv, err := NewDriver()
+	if err != nil {
+		t.Fatalf("NewDriver: %v", err)
+	}
+	if _, ok := drv.(*S3Driver); !ok {
+		t.Fatalf("expected *S3Driver, got %T", drv)
+	}
+}

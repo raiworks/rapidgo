@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +32,24 @@ func NewStore(db *gorm.DB) (Store, error) {
 		}
 		return store, nil
 	case "redis":
-		return nil, fmt.Errorf("redis session driver requires github.com/redis/go-redis/v9 — not yet included")
+		host := os.Getenv("REDIS_HOST")
+		if host == "" {
+			host = "localhost"
+		}
+		port := os.Getenv("REDIS_PORT")
+		if port == "" {
+			port = "6379"
+		}
+		password := os.Getenv("REDIS_PASSWORD")
+		client := redis.NewClient(&redis.Options{
+			Addr:     host + ":" + port,
+			Password: password,
+		})
+		prefix := os.Getenv("SESSION_PREFIX")
+		if prefix == "" {
+			prefix = "session:"
+		}
+		return NewRedisStore(client, prefix), nil
 	default:
 		return nil, fmt.Errorf("unsupported SESSION_DRIVER: %s", driver)
 	}
