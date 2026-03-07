@@ -958,3 +958,67 @@ func TestRateLimitAlias_IsResolvable(t *testing.T) {
 		t.Fatal("expected ratelimit alias to resolve to a handler")
 	}
 }
+
+// --- AdminOnly Middleware Tests ---
+
+// TC-38: AdminOnly allows request when role is "admin".
+func TestAdminOnly_AllowsAdmin(t *testing.T) {
+	e := newTestEngine()
+	e.Use(func(c *gin.Context) {
+		c.Set("role", "admin")
+		c.Next()
+	})
+	e.Use(AdminOnly())
+	e.GET("/admin", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	w := doRequest(e, http.MethodGet, "/admin")
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+}
+
+// TC-39: AdminOnly blocks request when role is "user".
+func TestAdminOnly_BlocksUser(t *testing.T) {
+	e := newTestEngine()
+	e.Use(func(c *gin.Context) {
+		c.Set("role", "user")
+		c.Next()
+	})
+	e.Use(AdminOnly())
+	e.GET("/admin", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	w := doRequest(e, http.MethodGet, "/admin")
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d", w.Code)
+	}
+
+	var body map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &body)
+	if body["error"] != "admin access required" {
+		t.Fatalf("expected 'admin access required', got %v", body["error"])
+	}
+}
+
+// TC-40: AdminOnly blocks request when role is not set.
+func TestAdminOnly_BlocksNoRole(t *testing.T) {
+	e := newTestEngine()
+	e.Use(AdminOnly())
+	e.GET("/admin", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	w := doRequest(e, http.MethodGet, "/admin")
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d", w.Code)
+	}
+
+	var body map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &body)
+	if body["error"] != "admin access required" {
+		t.Fatalf("expected 'admin access required', got %v", body["error"])
+	}
+}
