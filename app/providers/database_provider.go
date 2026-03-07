@@ -1,8 +1,10 @@
 package providers
 
 import (
+	"github.com/RAiWorks/RapidGo/core/config"
 	"github.com/RAiWorks/RapidGo/core/container"
 	"github.com/RAiWorks/RapidGo/database"
+	"gorm.io/gorm"
 )
 
 // DatabaseProvider registers the database connection in the service container.
@@ -17,6 +19,18 @@ func (p *DatabaseProvider) Register(c *container.Container) {
 			panic("database connection failed: " + err.Error())
 		}
 		return db
+	})
+
+	c.Singleton("db.resolver", func(c *container.Container) interface{} {
+		writer := c.Make("db").(*gorm.DB)
+		if config.Env("DB_READ_HOST", "") == "" {
+			return database.NewResolver(writer, writer)
+		}
+		reader, err := database.ConnectWithConfig(database.NewReadDBConfig())
+		if err != nil {
+			panic("read database connection failed: " + err.Error())
+		}
+		return database.NewResolver(writer, reader)
 	})
 }
 

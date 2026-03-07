@@ -94,6 +94,25 @@ func ConnectWithConfig(cfg DBConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
+// NewReadDBConfig reads read-replica configuration from DB_READ_* environment
+// variables. Each setting falls back to the corresponding DB_* value, then to
+// the same defaults used by NewDBConfig.
+func NewReadDBConfig() DBConfig {
+	return DBConfig{
+		Driver:          config.Env("DB_READ_DRIVER", config.Env("DB_DRIVER", "")),
+		Host:            config.Env("DB_READ_HOST", config.Env("DB_HOST", "localhost")),
+		Port:            config.Env("DB_READ_PORT", config.Env("DB_PORT", "5432")),
+		Name:            config.Env("DB_READ_NAME", config.Env("DB_NAME", "rapidgo_dev")),
+		User:            config.Env("DB_READ_USER", config.Env("DB_USER", "")),
+		Password:        config.Env("DB_READ_PASSWORD", config.Env("DB_PASSWORD", "")),
+		SSLMode:         config.Env("DB_READ_SSL_MODE", config.Env("DB_SSL_MODE", "disable")),
+		MaxOpenConns:    config.EnvInt("DB_READ_MAX_OPEN_CONNS", config.EnvInt("DB_MAX_OPEN_CONNS", 25)),
+		MaxIdleConns:    config.EnvInt("DB_READ_MAX_IDLE_CONNS", config.EnvInt("DB_MAX_IDLE_CONNS", 10)),
+		ConnMaxLifetime: time.Duration(config.EnvInt("DB_READ_CONN_MAX_LIFETIME", config.EnvInt("DB_CONN_MAX_LIFETIME", 5))) * time.Minute,
+		ConnMaxIdleTime: time.Duration(config.EnvInt("DB_READ_CONN_MAX_IDLE_TIME", config.EnvInt("DB_CONN_MAX_IDLE_TIME", 3))) * time.Minute,
+	}
+}
+
 // newDialector creates the appropriate GORM dialector for the configured driver.
 func newDialector(cfg DBConfig) (gorm.Dialector, error) {
 	switch cfg.Driver {
