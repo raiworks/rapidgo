@@ -2,7 +2,7 @@
 
 > **Feature**: `51` — Audit Logging
 > **Discussion**: [`51-audit-logging-discussion.md`](51-audit-logging-discussion.md)
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
 
 ---

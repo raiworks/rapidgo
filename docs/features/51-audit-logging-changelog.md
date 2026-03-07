@@ -1,9 +1,9 @@
 # 📝 Changelog: Audit Logging
 
 > **Feature**: `51` — Audit Logging
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
-> **Commit**: _pending_
+> **Commit**: `1f56346`
 
 ---
 

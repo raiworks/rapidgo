@@ -2,7 +2,7 @@
 
 > **Feature**: `51` — Audit Logging
 > **Tasks**: [`51-audit-logging-tasks.md`](51-audit-logging-tasks.md)
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
 
 ---

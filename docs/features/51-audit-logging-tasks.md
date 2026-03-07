@@ -2,7 +2,7 @@
 
 > **Feature**: `51` — Audit Logging
 > **Architecture**: [`51-audit-logging-architecture.md`](51-audit-logging-architecture.md)
-> **Status**: 🟡 IN PROGRESS
+> **Status**: ✅ SHIPPED
 > **Date**: 2026-03-07
 
 ---
