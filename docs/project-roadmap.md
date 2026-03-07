@@ -186,7 +186,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 43 | Task Scheduler / Cron | 🔮 | #05 | Advanced Features (Planned) |
 | 44 | Plugin / Module System | 🔮 | #05, #06 | Advanced Features (Planned) |
 | 45 | GraphQL Support | 🔮 | #07 | Advanced Features (Planned) |
-| 46 | Admin Panel Scaffolding | 🔮 | #15, #17 | Advanced Features (Planned) |
+| 46 | Admin Panel Scaffolding | ✅ | #15, #17 | Advanced Features (Shipped) |
 | 47 | API Versioning | 🔮 | #07 | Advanced Features (Planned) |
 | 48 | WebSocket Rooms / Channels | 🔮 | #31 | Advanced Features (Planned) |
 | 49 | OAuth2 / Social Login | 🔮 | #21 | Advanced Features (Planned) |
