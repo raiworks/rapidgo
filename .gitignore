@@ -40,3 +40,6 @@ reference/
 tmp/
 *.tmp
 coverage.html
+
+# --- SSH keys ---
+*.pem
