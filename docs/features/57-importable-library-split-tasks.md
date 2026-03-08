@@ -4,7 +4,7 @@
 > **Architecture**: [`57-importable-library-split-architecture.md`](57-importable-library-split-architecture.md)
 > **Branch**: `v2` (integration) with sub-branches per step
 > **Status**: 🔴 NOT STARTED
-> **Progress**: 0/40 tasks complete
+> **Progress**: 0/60 tasks complete (across 10 steps in 4 phases)
 
 ---
 

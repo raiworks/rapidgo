@@ -271,6 +271,40 @@
 | **Status** | ⬜ Not Run |
 | **Notes** | Requires database setup for 2–4 |
 
+#### TC-C06: Library go.mod Clean
+
+| Property | Value |
+|---|---|
+| **Category** | Happy Path |
+| **Precondition** | C1 complete |
+| **Steps** | 1. Run `go mod tidy` → 2. Check `git diff go.mod go.sum` is empty (no further changes) |
+| **Expected Result** | No unused dependencies remain |
+| **Status** | ⬜ Not Run |
+| **Notes** | — |
+
+#### TC-C07: Starter Module Resolution
+
+| Property | Value |
+|---|---|
+| **Category** | Happy Path |
+| **Precondition** | C2 complete |
+| **Steps** | 1. (in starter dir) `go mod tidy` → 2. Verify `go.mod` imports `github.com/RAiWorks/RapidGo` → 3. `go build ./...` |
+| **Expected Result** | Module resolves correctly, builds |
+| **Status** | ⬜ Not Run |
+| **Notes** | — |
+| **Notes** | — |
+
+#### TC-C05: Starter Commands
+
+| Property | Value |
+|---|---|
+| **Category** | Happy Path |
+| **Precondition** | C2 complete with database configured |
+| **Steps** | 1. `go run cmd/main.go version` → 2. `go run cmd/main.go serve` → 3. `go run cmd/main.go migrate` → 4. `go run cmd/main.go db:seed` |
+| **Expected Result** | Version prints, server starts, migrations run, seeding works |
+| **Status** | ⬜ Not Run |
+| **Notes** | Requires database setup for 2–4 |
+
 ### Phase D — Polish
 
 #### TC-D01: `rapidgo new` — No Args
@@ -353,10 +387,10 @@
 |---|---|---|---|---|
 | Phase A | 8 | — | — | — |
 | Phase B | 9 | — | — | — |
-| Phase C | 5 | — | — | — |
+| Phase C | 7 | — | — | — |
 | Phase D | 4 | — | — | — |
 | Edge Cases | 5 | — | — | — |
 | Security | 3 | — | — | — |
-| **Total** | **34** | — | — | — |
+| **Total** | **36** | — | — | — |
 
 **Result**: ⬜ NOT RUN
