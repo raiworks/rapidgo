@@ -11,6 +11,25 @@
 
 <!-- Add entries as you work. Most recent first. -->
 
+### Step D2 — `feature/v2-10-library-readme` → `v2`
+- Rewrote `README.md` for importable library: package index (33 packages), hook system docs, quick start
+
+### Step D1 — `feature/v2-09-rapidgo-new-cmd` → `v2` (commit `e0835e7`)
+- Created `core/cli/new.go`: `rapidgo new` command — downloads starter zip, extracts, replaces module name, runs `go mod tidy`
+- Created `core/cli/new_test.go`: 6 tests (extract, zip slip, module rename, invalid name, existing dir)
+- Added `newCmd` to `root.go` init block
+
+### Step C1 — `feature/v2-07-remove-app-code` → `v2` (commit `53304dc`)
+- Deleted 8 app directories: `app/`, `routes/`, `http/`, `plugins/`, `resources/`, `storage/`, `tests/`, `reference/`
+- Deleted `database/querybuilder/`, app migration files, `user.go`, `post.go`, `audit_log.go`, `registry.go`, `user_seeder.go`, `transaction_example.go`
+- Deleted root files: `Dockerfile`, `docker-compose.yml`, `Caddyfile`, `Makefile`, `.dockerignore`, `.env.example`
+- Rewrote `models_test.go` with generic `testItem` (no User/Post refs)
+- Rewrote `scopes_test.go` with `testScopesItem` (no User refs)
+- Removed TC-06/TC-07 from `seeders_test.go` (UserSeeder)
+- Removed TC-05/TC-06/TC-07 from `transaction_test.go` (TransferCredits)
+- Updated `cmd/main.go` to minimal library CLI
+- 76 files changed, 3058 deletions. All 34 packages build and pass tests.
+
 ### Gate B — PASSED
 - Zero `app/`, `routes/`, `http/`, `plugins/`, `database/models`, `database/seeders` imports in `core/`
 - All 40 packages pass, all 7 coupling points resolved
