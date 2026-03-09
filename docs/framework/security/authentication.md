@@ -1,9 +1,9 @@
 ---
 title: "Authentication"
-version: "0.1.0"
-status: "Draft"
+version: "1.0.0"
+status: "Final"
 date: "2026-03-05"
-last_updated: "2026-03-05"
+last_updated: "2026-03-10"
 authors:
   - "RAiWorks"
 supersedes: ""
@@ -57,29 +57,62 @@ Library: `github.com/golang-jwt/jwt/v5`
 package auth
 
 import (
+    "errors"
     "os"
+    "strconv"
     "time"
 
     "github.com/golang-jwt/jwt/v5"
 )
 
+// GenerateToken creates a signed JWT for the given user ID.
+// Reads JWT_SECRET and JWT_EXPIRY (seconds) from environment.
 func GenerateToken(userID uint) (string, error) {
+    secret := os.Getenv("JWT_SECRET")
+    if secret == "" {
+        return "", errors.New("JWT_SECRET is not set")
+    }
+    if len(secret) < 32 {
+        return "", errors.New("JWT_SECRET must be at least 32 bytes")
+    }
+
+    expiry := 3600 // default 1 hour
+    if v := os.Getenv("JWT_EXPIRY"); v != "" {
+        if parsed, err := strconv.Atoi(v); err == nil {
+            expiry = parsed
+        }
+    }
+
     claims := jwt.MapClaims{
         "user_id": userID,
-        "exp":     time.Now().Add(24 * time.Hour).Unix(),
+        "exp":     time.Now().Add(time.Duration(expiry) * time.Second).Unix(),
+        "iat":     time.Now().Unix(),
     }
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+    return token.SignedString([]byte(secret))
 }
 ```
 
 ### Token Validation
 
 ```go
+// ValidateToken parses and validates a JWT string.
+// Returns the claims if the token is valid.
 func ValidateToken(tokenStr string) (jwt.MapClaims, error) {
+    secret := os.Getenv("JWT_SECRET")
+    if secret == "" {
+        return nil, errors.New("JWT_SECRET is not set")
+    }
+    if len(secret) < 32 {
+        return nil, errors.New("JWT_SECRET must be at least 32 bytes")
+    }
+
     token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-        return []byte(os.Getenv("JWT_SECRET")), nil
+        if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, errors.New("unexpected signing method")
+        }
+        return []byte(secret), nil
     })
     if err != nil {
         return nil, err
@@ -196,8 +229,8 @@ func Dashboard(c *gin.Context) {
 
 - `JWT_SECRET` **MUST** be a strong, random value (minimum 32 bytes)
   and **MUST NOT** be committed to version control.
-- JWT tokens **SHOULD** have short lifetimes (e.g., 24 hours).
-  Implement refresh tokens for longer sessions.
+- JWT tokens **SHOULD** have short lifetimes (default: 1 hour via
+  `JWT_EXPIRY` env var). Implement refresh tokens for longer sessions.
 - Always use `HS256` or stronger signing methods. Never allow `none`
   algorithm.
 - Password comparison **MUST** use `bcrypt.CompareHashAndPassword`
@@ -216,3 +249,4 @@ func Dashboard(c *gin.Context) {
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 0.1.0 | 2026-03-05 | RAiWorks | Initial draft |
+| 1.0.0 | 2026-03-10 | RAiWorks | Fixed code examples to match source (secret validation, signing method check, correct default expiry) |

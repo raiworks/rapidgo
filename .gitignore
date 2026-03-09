@@ -36,6 +36,14 @@ desktop.ini
 # --- Reference docs (architecture design — not shipped) ---
 reference/
 
+# --- Internal planning & review docs (not shipped) ---
+docs/documentation-overhaul-overview.md
+docs/rapidgo_docs_review.md
+docs/rapidgo_framework_analysis.md
+docs/rapidgo_microservices_review.md
+docs/docs-site-plan.md
+docs/website-plan.md
+
 # --- Temporary ---
 tmp/
 *.tmp

@@ -1,9 +1,9 @@
 ---
 title: "Creating a CRUD Application"
 version: "0.1.0"
-status: "Draft"
+status: "Final"
 date: "2026-03-05"
-last_updated: "2026-03-05"
+last_updated: "2026-03-10"
 authors:
   - "RAiWorks"
 supersedes: ""
