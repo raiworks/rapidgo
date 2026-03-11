@@ -202,6 +202,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 56 | Service Mode (Multi-Port Serving) | ✅ | #07 | Infrastructure (Shipped) |
 | 57 | Importable Library Split | 🟡 | All | Infrastructure (In Progress) |
 | 58 | Documentation & AI Visibility | ✅ | All | Documentation (Shipped) |
+| 59 | v2.1.0 Release | ✅ | All | Release (Shipped) |
 
 ---
 
