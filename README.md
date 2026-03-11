@@ -2,9 +2,9 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://go.dev)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Features](https://img.shields.io/badge/Features-56-success)](FEATURES.md)
+[![Features](https://img.shields.io/badge/Features-58-success)](FEATURES.md)
 
-**The Laravel of Go.** A batteries-included web framework with 56 features, built on [Gin](https://github.com/gin-gonic/gin) + [GORM](https://gorm.io) + [Cobra](https://cobra.dev).
+**The Laravel of Go.** A batteries-included web framework with 58 features, built on [Gin](https://github.com/gin-gonic/gin) + [GORM](https://gorm.io) + [Cobra](https://cobra.dev).
 
 ---
 
@@ -19,7 +19,7 @@ Go has amazing HTTP routers (Gin, Echo, Fiber) — but **no full application fra
 | Full application framework (like Laravel/NestJS/Django) | An HTTP router (that's Gin's job — RapidGo uses Gin internally) |
 | Batteries-included for real apps | A microservice mesh (use Go Kit, Kratos, or Dapr for that) |
 | Convention-over-configuration | A minimal toolkit that requires assembly |
-| 56 shipped features, production-ready | An experiment or proof-of-concept |
+| 58 shipped features, production-ready | An experiment or proof-of-concept |
 
 ---
 
@@ -61,14 +61,15 @@ Go has amazing HTTP routers (Gin, Echo, Fiber) — but **no full application fra
 - ✅ **TOTP two-factor auth** — with bcrypt-hashed backup codes via `pquerna/otp`
 - ✅ **CSRF protection** — double-submit cookie pattern with per-request tokens
 - ✅ **CORS** — per-origin, per-method, per-header configuration
-- ✅ **Rate limiting** — token bucket with per-IP and per-route limits via `ulule/limiter`
+- ✅ **Rate limiting** — token bucket with per-IP, per-route, and per-user limits via `ulule/limiter`
 - ✅ **Crypto utilities** — AES-256-GCM encryption, bcrypt hashing, HMAC-SHA256, secure random tokens
 - ✅ **Audit logging** — who did what, when, with structured audit trail
 
 ### Infrastructure
-- ✅ **Queue workers** — background jobs with 4 drivers (database, Redis, memory, sync)
+- ✅ **Queue workers** — background jobs with 4 drivers (database, Redis, memory, sync), per-job backoff
 - ✅ **Task scheduler** — cron-based scheduling via `robfig/cron`
 - ✅ **Event system** — publish-subscribe with sync/async dispatch
+- ✅ **Notification system** — unified dispatch to database + email channels via `Notifiable` interface
 - ✅ **Caching** — Redis, in-memory, and file-based with TTL support
 - ✅ **Mail** — SMTP email via `go-mail`
 - ✅ **File storage** — local filesystem and Amazon S3 via unified interface
@@ -89,8 +90,10 @@ Go has amazing HTTP routers (Gin, Echo, Fiber) — but **no full application fra
 - ✅ **Docker** — multi-stage Dockerfile + docker-compose
 - ✅ **Caddy integration** — optional auto-HTTPS reverse proxy
 - ✅ **Multi-port serving** — service mode for Web, API, WebSocket on separate ports
+- ✅ **WebSocket** — real-time with rooms, broadcasting, heartbeat, and lifecycle callbacks
+- ✅ **Pagination** — offset-based and cursor-based (infinite scroll) helpers
 
-> **[See all 56 features with package paths →](FEATURES.md)**
+> **[See all 58 features with package paths →](FEATURES.md)**
 
 ---
 
@@ -224,6 +227,7 @@ Or clone the starter: [RapidGo-starter](https://github.com/RAiWorks/RapidGo-star
 | mail | `core/mail` | SMTP email via go-mail |
 | metrics | `core/metrics` | Prometheus metrics collection |
 | middleware | `core/middleware` | Middleware registry (CORS, CSRF, rate limit, auth, session, request ID, recovery) |
+| notification | `core/notification` | Notification system (database + mail channels) |
 | oauth | `core/oauth` | OAuth2 / social login providers |
 | plugin | `core/plugin` | Plugin / module system |
 | queue | `core/queue` | Background job queue (4 drivers: database, Redis, memory, sync) |
@@ -235,8 +239,8 @@ Or clone the starter: [RapidGo-starter](https://github.com/RAiWorks/RapidGo-star
 | storage | `core/storage` | File storage (local disk + Amazon S3) |
 | totp | `core/totp` | TOTP two-factor authentication with backup codes |
 | validation | `core/validation` | Request validation engine |
-| websocket | `core/websocket` | WebSocket support with rooms and channels |
-| database | `database/` | Connection, transactions, resolver, read/write splitting |
+| websocket | `core/websocket` | WebSocket support with rooms, broadcasting, heartbeat, and callbacks |
+| database | `database/` | Connection, transactions, resolver, read/write splitting, pagination |
 | migrations | `database/migrations` | Migration engine with up/down |
 | models | `database/models` | BaseModel with soft deletes and query scopes |
 | seeders | `database/seeders` | Seeder engine with interface-based registry |
@@ -274,7 +278,7 @@ cli.SetSeeder(func(db *gorm.DB, name string) error {
 
 | Resource | Description |
 |---|---|
-| **[Complete Feature List](FEATURES.md)** | All 56 features with package paths |
+| **[Complete Feature List](FEATURES.md)** | All 58 features with package paths |
 | **[Framework Comparison](COMPARISON.md)** | RapidGo vs Gin, Echo, Fiber, Go Kit |
 | **[Framework Reference](docs/framework/README.md)** | 59 RFC-style reference documents |
 | **[Architecture Overview](docs/framework/architecture/overview.md)** | System design and patterns |
