@@ -708,3 +708,91 @@ func TestWorkerJobTimeout(t *testing.T) {
 		t.Errorf("failed count = %d, want 1 (timeout should cause failure)", len(mem.failed))
 	}
 }
+
+// ─── DispatchWithBackoff ──────────────────────────────────────────────────────
+
+func TestDispatchWithBackoff(t *testing.T) {
+	ResetHandlers()
+	defer ResetHandlers()
+
+	RegisterHandler("backoff_test", func(_ context.Context, _ json.RawMessage) error {
+		return nil
+	})
+
+	mem := NewMemoryDriver()
+	disp := NewDispatcher(mem)
+	backoff := []uint{5, 30, 120}
+	err := disp.DispatchWithBackoff(context.Background(), "default", "backoff_test", "data", backoff)
+	if err != nil {
+		t.Fatalf("DispatchWithBackoff error: %v", err)
+	}
+
+	job, _ := mem.Pop(context.Background(), "default")
+	if job == nil {
+		t.Fatal("expected job, got nil")
+	}
+	if job.MaxAttempts != 4 {
+		t.Errorf("MaxAttempts = %d, want 4 (len(backoff)+1)", job.MaxAttempts)
+	}
+	if len(job.BackoffSeconds) != 3 {
+		t.Errorf("BackoffSeconds len = %d, want 3", len(job.BackoffSeconds))
+	}
+}
+
+func TestDispatchWithBackoff_UnknownHandler(t *testing.T) {
+	ResetHandlers()
+	defer ResetHandlers()
+
+	mem := NewMemoryDriver()
+	disp := NewDispatcher(mem)
+	err := disp.DispatchWithBackoff(context.Background(), "default", "nope", "data", []uint{5})
+	if err == nil {
+		t.Fatal("expected error for unknown handler")
+	}
+}
+
+// ─── RetryDelay (backoff) ─────────────────────────────────────────────────────
+
+func TestRetryDelay_UsesBackoffSlice(t *testing.T) {
+	w := NewWorker(NewMemoryDriver(), WorkerConfig{
+		RetryDelay: 30 * time.Second,
+	}, testLogger())
+
+	job := &Job{BackoffSeconds: []uint{5, 30, 120}}
+
+	// attempt 0 → backoff[0] = 5s
+	job.Attempts = 0
+	if d := w.retryDelay(job); d != 5*time.Second {
+		t.Errorf("attempt 0: got %v, want 5s", d)
+	}
+
+	// attempt 1 → backoff[1] = 30s
+	job.Attempts = 1
+	if d := w.retryDelay(job); d != 30*time.Second {
+		t.Errorf("attempt 1: got %v, want 30s", d)
+	}
+
+	// attempt 2 → backoff[2] = 120s
+	job.Attempts = 2
+	if d := w.retryDelay(job); d != 120*time.Second {
+		t.Errorf("attempt 2: got %v, want 120s", d)
+	}
+
+	// attempt 3 → beyond slice → use last = 120s
+	job.Attempts = 3
+	if d := w.retryDelay(job); d != 120*time.Second {
+		t.Errorf("attempt 3: got %v, want 120s (last)", d)
+	}
+}
+
+func TestRetryDelay_FallsBackToConfig(t *testing.T) {
+	w := NewWorker(NewMemoryDriver(), WorkerConfig{
+		RetryDelay: 45 * time.Second,
+	}, testLogger())
+
+	job := &Job{} // no BackoffSeconds
+	job.Attempts = 0
+	if d := w.retryDelay(job); d != 45*time.Second {
+		t.Errorf("got %v, want 45s (config fallback)", d)
+	}
+}

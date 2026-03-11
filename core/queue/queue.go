@@ -10,15 +10,16 @@ import (
 
 // Job represents a unit of work to be processed by a worker.
 type Job struct {
-	ID          uint64
-	Queue       string
-	Type        string
-	Payload     json.RawMessage
-	Attempts    uint
-	MaxAttempts uint
-	AvailableAt time.Time
-	ReservedAt  *time.Time
-	CreatedAt   time.Time
+	ID             uint64
+	Queue          string
+	Type           string
+	Payload        json.RawMessage
+	Attempts       uint
+	MaxAttempts    uint
+	BackoffSeconds []uint // per-attempt retry delays in seconds; falls back to WorkerConfig.RetryDelay
+	AvailableAt    time.Time
+	ReservedAt     *time.Time
+	CreatedAt      time.Time
 }
 
 // HandlerFunc processes a job. Receives the raw JSON payload.
@@ -126,6 +127,34 @@ func (d *Dispatcher) DispatchDelayed(ctx context.Context, queue, typeName string
 		MaxAttempts: 3,
 		AvailableAt: time.Now().Add(delay),
 		CreatedAt:   time.Now(),
+	}
+
+	return d.driver.Push(ctx, job)
+}
+
+// DispatchWithBackoff pushes a job with per-attempt retry delays.
+// backoffSeconds defines the delay (in seconds) before each retry attempt.
+// For example, []uint{5, 30, 120} means: 5s before retry 1, 30s before
+// retry 2, 120s before retry 3. MaxAttempts is set to len(backoffSeconds)+1.
+func (d *Dispatcher) DispatchWithBackoff(ctx context.Context, queue, typeName string, payload interface{}, backoffSeconds []uint) error {
+	if handler := ResolveHandler(typeName); handler == nil {
+		return fmt.Errorf("queue: no handler registered for type %q", typeName)
+	}
+
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("queue: failed to marshal payload: %w", err)
+	}
+
+	job := &Job{
+		Queue:          queue,
+		Type:           typeName,
+		Payload:        data,
+		Attempts:       0,
+		MaxAttempts:    uint(len(backoffSeconds)) + 1,
+		BackoffSeconds: backoffSeconds,
+		AvailableAt:    time.Now(),
+		CreatedAt:      time.Now(),
 	}
 
 	return d.driver.Push(ctx, job)
