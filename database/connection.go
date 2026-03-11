@@ -3,6 +3,9 @@ package database
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/RAiWorks/RapidGo/v2/core/config"
@@ -10,6 +13,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 // DBConfig holds database connection configuration.
@@ -76,7 +80,9 @@ func ConnectWithConfig(cfg DBConfig) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db, err := gorm.Open(dialector, &gorm.Config{})
+	db, err := gorm.Open(dialector, &gorm.Config{
+		Logger: newGormLogger(),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("database connection failed: %w", err)
 	}
@@ -111,6 +117,30 @@ func NewReadDBConfig() DBConfig {
 		ConnMaxLifetime: time.Duration(config.EnvInt("DB_READ_CONN_MAX_LIFETIME", config.EnvInt("DB_CONN_MAX_LIFETIME", 5))) * time.Minute,
 		ConnMaxIdleTime: time.Duration(config.EnvInt("DB_READ_CONN_MAX_IDLE_TIME", config.EnvInt("DB_CONN_MAX_IDLE_TIME", 3))) * time.Minute,
 	}
+}
+
+// newGormLogger returns a GORM logger configured based on environment.
+// In development (APP_ENV=development) or when DB_LOG=true, it logs all
+// queries with execution times. In production it stays silent.
+func newGormLogger() gormlogger.Interface {
+	env := strings.ToLower(config.Env("APP_ENV", "production"))
+	dbLog := strings.ToLower(config.Env("DB_LOG", "false"))
+
+	if env != "development" && dbLog != "true" {
+		return gormlogger.Default.LogMode(gormlogger.Silent)
+	}
+
+	threshold := time.Duration(config.EnvInt("DB_SLOW_THRESHOLD_MS", 200)) * time.Millisecond
+
+	return gormlogger.New(
+		log.New(os.Stdout, "\n", log.LstdFlags),
+		gormlogger.Config{
+			SlowThreshold:             threshold,
+			LogLevel:                  gormlogger.Info,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		},
+	)
 }
 
 // newDialector creates the appropriate GORM dialector for the configured driver.

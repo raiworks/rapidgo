@@ -127,7 +127,8 @@ func (w *Worker) process(ctx context.Context, workerID int, job *Job) {
 		"attempt", job.Attempts+1, "max_attempts", maxAttempts, "error", err)
 
 	if job.Attempts+1 < maxAttempts {
-		_ = w.driver.Release(ctx, job, w.config.RetryDelay)
+		delay := w.retryDelay(job)
+		_ = w.driver.Release(ctx, job, delay)
 	} else {
 		_ = w.driver.Fail(ctx, job, err)
 	}
@@ -142,4 +143,19 @@ func (w *Worker) safeExecute(ctx context.Context, handler HandlerFunc, job *Job)
 		}
 	}()
 	return handler(ctx, job.Payload)
+}
+
+// retryDelay returns the delay before the next retry. Uses the per-job
+// BackoffSeconds slice when available, falling back to the worker-level
+// RetryDelay.
+func (w *Worker) retryDelay(job *Job) time.Duration {
+	idx := int(job.Attempts) // attempts is pre-increment; index 0 = first retry
+	if len(job.BackoffSeconds) > idx {
+		return time.Duration(job.BackoffSeconds[idx]) * time.Second
+	}
+	// If backoff slice is shorter than attempts, use last entry
+	if len(job.BackoffSeconds) > 0 {
+		return time.Duration(job.BackoffSeconds[len(job.BackoffSeconds)-1]) * time.Second
+	}
+	return w.config.RetryDelay
 }

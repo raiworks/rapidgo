@@ -626,3 +626,125 @@ func TestHub_Concurrent(t *testing.T) {
 	wg.Wait()
 	close(done)
 }
+
+// T19: NewHubWithConfig applies custom config
+func TestNewHubWithConfig(t *testing.T) {
+	hub := NewHubWithConfig(HubConfig{
+		PingInterval: 5 * time.Second,
+		PongTimeout:  2 * time.Second,
+	})
+	if hub == nil {
+		t.Fatal("NewHubWithConfig returned nil")
+	}
+	if hub.config.PingInterval != 5*time.Second {
+		t.Fatalf("PingInterval = %v, want 5s", hub.config.PingInterval)
+	}
+	if hub.config.PongTimeout != 2*time.Second {
+		t.Fatalf("PongTimeout = %v, want 2s", hub.config.PongTimeout)
+	}
+}
+
+// T20: OnJoin callback fires on Join (not on duplicate)
+func TestHub_OnJoin_Fires(t *testing.T) {
+	hub := NewHub()
+	var mu sync.Mutex
+	var calls []string
+
+	hub.OnJoin(func(c *Client, room string) {
+		mu.Lock()
+		calls = append(calls, c.ID+":"+room)
+		mu.Unlock()
+	})
+
+	done := make(chan struct{})
+	s := newHubServer(hub, func(c *Client) {
+		hub.Join(c, "lobby")
+		hub.Join(c, "lobby") // duplicate — should NOT fire again
+		hub.Join(c, "chat")
+		close(done)
+		// keep alive until test reads
+		<-make(chan struct{})
+	})
+	defer s.Close()
+
+	conn := dialHub(t, s)
+	defer conn.CloseNow()
+
+	<-done
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(calls) != 2 {
+		t.Fatalf("OnJoin fired %d times, want 2", len(calls))
+	}
+}
+
+// T21: OnLeave callback fires on Leave
+func TestHub_OnLeave_Fires(t *testing.T) {
+	hub := NewHub()
+	var mu sync.Mutex
+	var calls []string
+
+	hub.OnLeave(func(c *Client, room string) {
+		mu.Lock()
+		calls = append(calls, c.ID+":"+room)
+		mu.Unlock()
+	})
+
+	done := make(chan struct{})
+	s := newHubServer(hub, func(c *Client) {
+		hub.Join(c, "lobby")
+		hub.Leave(c, "lobby")
+		hub.Leave(c, "lobby") // not in room — should NOT fire
+		close(done)
+		<-make(chan struct{})
+	})
+	defer s.Close()
+
+	conn := dialHub(t, s)
+	defer conn.CloseNow()
+
+	<-done
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(calls) != 1 {
+		t.Fatalf("OnLeave fired %d times, want 1", len(calls))
+	}
+}
+
+// T22: OnLeave fires for each room on Remove
+func TestHub_OnLeave_FiresOnRemove(t *testing.T) {
+	hub := NewHub()
+	var mu sync.Mutex
+	var rooms []string
+
+	hub.OnLeave(func(c *Client, room string) {
+		mu.Lock()
+		rooms = append(rooms, room)
+		mu.Unlock()
+	})
+
+	removed := make(chan struct{})
+	s := newHubServer(hub, func(c *Client) {
+		hub.Join(c, "r1")
+		hub.Join(c, "r2")
+		hub.Join(c, "r3")
+		// signal ready, then exit — Handler will call Remove
+		close(removed)
+	})
+	defer s.Close()
+
+	conn := dialHub(t, s)
+	defer conn.CloseNow()
+
+	<-removed
+	// Give Remove a moment to complete and fire callbacks
+	time.Sleep(100 * time.Millisecond)
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(rooms) != 3 {
+		t.Fatalf("OnLeave on Remove fired %d times, want 3 (got rooms: %v)", len(rooms), rooms)
+	}
+}

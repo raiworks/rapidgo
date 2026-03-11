@@ -1,6 +1,6 @@
 # RapidGo — Complete Feature List
 
-56 features shipped across 6 phases. Built on Go 1.25+, Gin, GORM, Cobra.
+58 features shipped across 7 phases. Built on Go 1.25+, Gin, GORM, Cobra.
 
 ---
 
@@ -15,7 +15,8 @@
 | Deployment + Testing + DX | 6 | Phase 5 |
 | Advanced Features | 13 | Phase 6 |
 | Infrastructure | 2 | Additional |
-| **Total** | **56** | **All Complete** |
+| v2.1.0 | 2 | v2.1.0 |
+| **Total** | **58** | **All Complete** |
 
 ---
 
@@ -271,6 +272,18 @@
 
 ---
 
+## v2.1.0 Features
+
+### #57 Pagination (Offset + Cursor)
+- **Package**: `database`
+- **Capabilities**: `Paginate()` with page/perPage clamping, `CursorPaginate()` with base64 cursors, next/prev direction, `HasMore` detection
+
+### #58 Notification System
+- **Package**: `core/notification`
+- **Capabilities**: `Notification`, `Channel`, `Notifiable` interfaces, `DatabaseChannel` (GORM), `MailChannel` (SMTP), `Notifier` multi-channel dispatch
+
+---
+
 ## Phase Summary
 
 | Phase | Name | Features | Status |
@@ -282,4 +295,5 @@
 | 5 | Deploy + Testing + DX | #36 – #41 (6) | ✅ Complete |
 | 6 | Advanced | #42 – #54 (13) | ✅ Complete |
 | — | Additional | #55 – #56 (2) | ✅ Complete |
-| | **Total** | **56** | **All Shipped** |
+| v2.1.0 | v2.1.0 Release | #57 – #58 (2) | ✅ Complete |
+| | **Total** | **58** | **All Shipped** |
