@@ -199,6 +199,57 @@ func TestGenerateToken_RejectsShortSecret(t *testing.T) {
 	}
 }
 
+// TC-J01: GenerateTokenFromString returns valid JWT
+func TestGenerateTokenFromString_ReturnsValidJWT(t *testing.T) {
+	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-32by")
+	t.Setenv("JWT_EXPIRY", "3600")
+
+	token, err := GenerateTokenFromString("uuid-abc-123")
+	if err != nil {
+		t.Fatalf("GenerateTokenFromString failed: %v", err)
+	}
+	if token == "" {
+		t.Fatal("expected non-empty token")
+	}
+}
+
+// TC-J02: GenerateTokenFromString — user_id is string in claims
+func TestGenerateTokenFromString_UserIDIsString(t *testing.T) {
+	t.Setenv("JWT_SECRET", "test-secret-key-for-testing-32by")
+	t.Setenv("JWT_EXPIRY", "3600")
+
+	token, err := GenerateTokenFromString("uuid-abc-123")
+	if err != nil {
+		t.Fatalf("GenerateTokenFromString failed: %v", err)
+	}
+
+	claims, err := ValidateToken(token)
+	if err != nil {
+		t.Fatalf("ValidateToken failed: %v", err)
+	}
+
+	userID, ok := claims["user_id"].(string)
+	if !ok {
+		t.Fatalf("expected user_id to be string, got %T", claims["user_id"])
+	}
+	if userID != "uuid-abc-123" {
+		t.Fatalf("expected user_id=%q, got %q", "uuid-abc-123", userID)
+	}
+}
+
+// TC-J03: GenerateTokenFromString fails without secret
+func TestGenerateTokenFromString_FailsWithoutSecret(t *testing.T) {
+	t.Setenv("JWT_SECRET", "")
+
+	_, err := GenerateTokenFromString("uuid-abc-123")
+	if err == nil {
+		t.Fatal("expected error when JWT_SECRET is empty")
+	}
+	if err.Error() != "JWT_SECRET is not set" {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 // TC-11: ValidateToken rejects secret shorter than 32 bytes
 func TestValidateToken_RejectsShortSecret(t *testing.T) {
 	t.Setenv("JWT_SECRET", "too-short")

@@ -171,3 +171,62 @@ func TestSetup_SetsDefault(t *testing.T) {
 		t.Fatal("slog.Default() should not be nil after Setup()")
 	}
 }
+
+// TC-L01: SlogLogger implements Logger interface (compile-time check)
+var _ Logger = (*SlogLogger)(nil)
+
+// TC-L02: With() returns a new Logger with attributes
+func TestSlogLogger_With(t *testing.T) {
+	var buf bytes.Buffer
+	handler := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})
+	l := NewSlogLogger(slog.New(handler))
+
+	child := l.With("component", "test")
+	if child == nil {
+		t.Fatal("With() should return a non-nil Logger")
+	}
+
+	child.Info("hello")
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
+		t.Fatalf("expected valid JSON: %v", err)
+	}
+	if result["component"] != "test" {
+		t.Errorf("expected component=test, got %v", result["component"])
+	}
+	if result["msg"] != "hello" {
+		t.Errorf("expected msg=hello, got %v", result["msg"])
+	}
+}
+
+// TC-L03: Setup() returns Logger interface
+func TestSetup_ReturnsLoggerInterface(t *testing.T) {
+	t.Setenv("LOG_FORMAT", "json")
+	t.Setenv("LOG_LEVEL", "info")
+	t.Setenv("LOG_OUTPUT", "stdout")
+
+	var l Logger = Setup()
+	if l == nil {
+		t.Fatal("Setup() should return a non-nil Logger")
+	}
+}
+
+// TC-L04: SlogLogger methods log to underlying handler
+func TestSlogLogger_AllMethods(t *testing.T) {
+	var buf bytes.Buffer
+	handler := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})
+	l := NewSlogLogger(slog.New(handler))
+
+	l.Debug("d")
+	l.Info("i")
+	l.Warn("w")
+	l.Error("e")
+
+	output := buf.String()
+	for _, msg := range []string{"d", "i", "w", "e"} {
+		if !strings.Contains(output, `"msg":"`+msg+`"`) {
+			t.Errorf("expected message %q in output", msg)
+		}
+	}
+}
