@@ -5,12 +5,13 @@ import (
 	"os"
 
 	"github.com/raiworks/rapidgo/v2/core/app"
+	"github.com/raiworks/rapidgo/v2/core/config"
 	"github.com/raiworks/rapidgo/v2/core/service"
 	"github.com/spf13/cobra"
 )
 
 // Version is the current framework version.
-const Version = "0.2.0"
+const Version = "2.4.0"
 
 var rootCmd = &cobra.Command{
 	Use:   "rapidgo",
@@ -51,6 +52,8 @@ func RootCmd() *cobra.Command {
 // NewApp creates and boots a RapidGo application configured for the given mode.
 // Used by commands that need the application lifecycle (serve, migrate, etc.).
 func NewApp(mode service.Mode) *app.App {
+	config.Load()
+
 	application := app.New()
 
 	if bootstrapFn != nil {

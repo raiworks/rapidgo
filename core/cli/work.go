@@ -24,8 +24,6 @@ var workCmd = &cobra.Command{
 	Use:   "work",
 	Short: "Start the queue worker to process background jobs",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config.Load()
-
 		application := NewApp(service.ModeAll)
 
 		// Register application job handlers via callback.

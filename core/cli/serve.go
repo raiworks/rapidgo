@@ -101,13 +101,15 @@ func init() {
 func serveSingle(application *app.App, mode service.Mode) error {
 	port := resolvePort(mode)
 	r := container.MustMake[*router.Router](application.Container, "router")
+	applyRoutesForMode(r, application.Container, mode)
+	read, write, idle, shutdown := resolveServerTimeouts()
 	return server.ListenAndServe(server.Config{
 		Addr:            ":" + port,
 		Handler:         r,
-		ReadTimeout:     15 * time.Second,
-		WriteTimeout:    15 * time.Second,
-		IdleTimeout:     60 * time.Second,
-		ShutdownTimeout: 30 * time.Second,
+		ReadTimeout:     read,
+		WriteTimeout:    write,
+		IdleTimeout:     idle,
+		ShutdownTimeout: shutdown,
 	})
 }
 
@@ -115,8 +117,19 @@ func serveSingle(application *app.App, mode service.Mode) error {
 func serveMulti(application *app.App, mode service.Mode) error {
 	var services []server.ServiceConfig
 
+	// Get global middleware from the container's router (registered by providers during Boot).
+	containerRouter := container.MustMake[*router.Router](application.Container, "router")
+	globalHandlers := containerRouter.GlobalHandlers()
+
+	read, write, idle, shutdown := resolveServerTimeouts()
+
 	for _, svc := range mode.Services() {
 		r := router.New()
+		// Copy global middleware from the container's router so provider-registered
+		// middleware (e.g., error handler, request ID) applies to per-service routers.
+		for _, h := range globalHandlers {
+			r.Use(h)
+		}
 		applyRoutesForMode(r, application.Container, svc)
 		port := resolvePortForMode(svc)
 
@@ -125,10 +138,10 @@ func serveMulti(application *app.App, mode service.Mode) error {
 			Config: server.Config{
 				Addr:            ":" + port,
 				Handler:         r,
-				ReadTimeout:     15 * time.Second,
-				WriteTimeout:    15 * time.Second,
-				IdleTimeout:     60 * time.Second,
-				ShutdownTimeout: 30 * time.Second,
+				ReadTimeout:     read,
+				WriteTimeout:    write,
+				IdleTimeout:     idle,
+				ShutdownTimeout: shutdown,
 			},
 		})
 	}
@@ -179,8 +192,27 @@ func applyRoutesForMode(r *router.Router, c *container.Container, m service.Mode
 	if c.Has("db") {
 		health.Routes(r, func() *gorm.DB {
 			return container.MustMake[*gorm.DB](c, "db")
-		})
+		}, Version)
 	}
+}
+
+// parseDuration parses a Go duration string, returning the fallback on error.
+func parseDuration(s string, fallback time.Duration) time.Duration {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return fallback
+	}
+	return d
+}
+
+// resolveServerTimeouts reads server timeout configuration from env vars.
+// Returns defaults matching the previous hardcoded values if unset.
+func resolveServerTimeouts() (read, write, idle, shutdown time.Duration) {
+	read = parseDuration(config.Env("SERVER_READ_TIMEOUT", "15s"), 15*time.Second)
+	write = parseDuration(config.Env("SERVER_WRITE_TIMEOUT", "15s"), 15*time.Second)
+	idle = parseDuration(config.Env("SERVER_IDLE_TIMEOUT", "60s"), 60*time.Second)
+	shutdown = parseDuration(config.Env("SERVER_SHUTDOWN_TIMEOUT", "30s"), 30*time.Second)
+	return
 }
 
 // allSamePort returns true if all services resolve to the same port.

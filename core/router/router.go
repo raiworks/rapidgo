@@ -86,6 +86,16 @@ func (r *Router) Use(middleware ...gin.HandlerFunc) {
 	r.engine.Use(middleware...)
 }
 
+// GlobalHandlers returns the global middleware handlers registered on the router.
+func (r *Router) GlobalHandlers() []gin.HandlerFunc {
+	return r.engine.Handlers
+}
+
+// NoRoute registers handlers for requests that match no routes.
+func (r *Router) NoRoute(handlers ...gin.HandlerFunc) {
+	r.engine.NoRoute(handlers...)
+}
+
 // SetFuncMap sets the template function map on the Gin engine.
 // Must be called before LoadTemplates.
 func (r *Router) SetFuncMap(funcMap template.FuncMap) {

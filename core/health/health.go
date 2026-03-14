@@ -10,9 +10,14 @@ import (
 
 // Routes registers liveness and readiness health-check endpoints.
 // The dbFn callback defers database resolution until the first request.
-func Routes(r *router.Router, dbFn func() *gorm.DB) {
+// An optional version string adds version info to the liveness response.
+func Routes(r *router.Router, dbFn func() *gorm.DB, version ...string) {
 	r.Get("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		resp := gin.H{"status": "ok"}
+		if len(version) > 0 && version[0] != "" {
+			resp["version"] = version[0]
+		}
+		c.JSON(http.StatusOK, resp)
 	})
 
 	r.Get("/health/ready", func(c *gin.Context) {

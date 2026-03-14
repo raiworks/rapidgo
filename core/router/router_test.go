@@ -386,3 +386,35 @@ func TestRouteParam_Extraction(t *testing.T) {
 		t.Errorf("expected '42', got %q", w.Body.String())
 	}
 }
+
+// TC-26: NoRoute registers a custom 404 handler
+func TestNoRoute_CustomHandler(t *testing.T) {
+	r := newTestRouter()
+	r.NoRoute(func(c *gin.Context) {
+		c.String(http.StatusNotFound, "custom 404")
+	})
+	r.Get("/exists", okHandler("found"))
+
+	w := doRequest(r, http.MethodGet, "/nonexistent")
+	if w.Code != http.StatusNotFound {
+		t.Errorf("expected 404, got %d", w.Code)
+	}
+	if w.Body.String() != "custom 404" {
+		t.Errorf("expected 'custom 404', got %q", w.Body.String())
+	}
+}
+
+// TC-27: GlobalHandlers returns registered global middleware
+func TestGlobalHandlers_ReturnsMiddleware(t *testing.T) {
+	r := newTestRouter()
+	if len(r.GlobalHandlers()) != 0 {
+		t.Fatalf("expected 0 global handlers on new router, got %d", len(r.GlobalHandlers()))
+	}
+
+	r.Use(func(c *gin.Context) { c.Next() })
+	r.Use(func(c *gin.Context) { c.Next() })
+
+	if len(r.GlobalHandlers()) != 2 {
+		t.Fatalf("expected 2 global handlers, got %d", len(r.GlobalHandlers()))
+	}
+}

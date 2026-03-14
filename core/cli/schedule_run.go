@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/raiworks/rapidgo/v2/core/config"
 	"github.com/raiworks/rapidgo/v2/core/scheduler"
 	"github.com/raiworks/rapidgo/v2/core/service"
 	"github.com/spf13/cobra"
@@ -17,8 +16,6 @@ var scheduleRunCmd = &cobra.Command{
 	Use:   "schedule:run",
 	Short: "Start the task scheduler to run registered tasks on their cron schedules",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config.Load()
-
 		application := NewApp(service.ModeAll)
 
 		// Create scheduler.

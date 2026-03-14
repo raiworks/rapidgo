@@ -5,6 +5,29 @@ All notable changes to the **RapidGo** framework will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-03-15
+
+### Fixed
+
+- **Critical**: `serveSingle()` now calls `applyRoutesForMode()` — routes registered via `SetRoutes()` were silently ignored in single-port mode (the default for most projects)
+- `serveMulti()` now copies global middleware from the container's router to per-service routers — provider-registered middleware (error handler, request ID, etc.) was previously lost when creating separate routers per service
+
+### Added
+
+- `Router.NoRoute()` — register custom 404 handlers without accessing the underlying Gin engine
+- `Router.GlobalHandlers()` — returns the global middleware handlers registered on the router
+- `health.Routes()` now accepts an optional `version` parameter — `/health` response includes `"version"` field when provided
+- `parseDuration()` and `resolveServerTimeouts()` helpers for env-configurable server timeouts
+- `core/cli/serve_test.go` — tests for timeout parsing and resolution
+- Tests for `NoRoute`, `GlobalHandlers`, and health version features
+
+### Changed
+
+- `config.Load()` moved into `NewApp()` — all CLI commands that bootstrap the app (`migrate`, `db:seed`, `migrate:rollback`, `migrate:status`) now automatically load `.env` values
+- Server timeouts are now configurable via `SERVER_READ_TIMEOUT`, `SERVER_WRITE_TIMEOUT`, `SERVER_IDLE_TIMEOUT`, `SERVER_SHUTDOWN_TIMEOUT` env vars (defaults unchanged: 15s, 15s, 60s, 30s)
+- Removed redundant `config.Load()` calls from `work` and `schedule:run` commands
+- Version constant bumped to `2.4.0`
+
 ## [2.3.0] - 2026-03-14
 
 ### Fixed
