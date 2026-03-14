@@ -7,14 +7,45 @@ import (
 	"github.com/raiworks/rapidgo/v2/core/config"
 )
 
+// Logger defines the logging contract for RapidGo.
+// The default implementation wraps slog. Users can implement this
+// interface to plug in Zap, Zerolog, or a test spy.
+type Logger interface {
+	Debug(msg string, args ...any)
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
+	With(args ...any) Logger
+}
+
+// SlogLogger wraps *slog.Logger to implement the Logger interface.
+type SlogLogger struct {
+	log *slog.Logger
+}
+
+// NewSlogLogger creates a Logger wrapping the given *slog.Logger.
+func NewSlogLogger(l *slog.Logger) *SlogLogger {
+	return &SlogLogger{log: l}
+}
+
+func (s *SlogLogger) Debug(msg string, args ...any) { s.log.Debug(msg, args...) }
+func (s *SlogLogger) Info(msg string, args ...any)  { s.log.Info(msg, args...) }
+func (s *SlogLogger) Warn(msg string, args ...any)  { s.log.Warn(msg, args...) }
+func (s *SlogLogger) Error(msg string, args ...any) { s.log.Error(msg, args...) }
+
+// With returns a new Logger with the given attributes attached to every log message.
+func (s *SlogLogger) With(args ...any) Logger {
+	return &SlogLogger{log: s.log.With(args...)}
+}
+
 // logFile holds the open log file handle (if LOG_OUTPUT=file).
 var logFile *os.File
 
 // Setup initializes the global slog logger based on config values.
 // Reads LOG_LEVEL, LOG_FORMAT, LOG_OUTPUT from environment.
 // Sets slog.SetDefault() so that slog.Info(), slog.Error() etc. work globally.
-// Returns the configured logger instance.
-func Setup() *slog.Logger {
+// Returns a Logger interface wrapping the configured slog instance.
+func Setup() Logger {
 	level := parseLevel(config.Env("LOG_LEVEL", "info"))
 	format := config.Env("LOG_FORMAT", "json")
 	output := config.Env("LOG_OUTPUT", "stdout")
@@ -49,7 +80,7 @@ func Setup() *slog.Logger {
 
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
-	return logger
+	return NewSlogLogger(logger)
 }
 
 // Close closes the log file if one was opened.

@@ -5,6 +5,19 @@ All notable changes to the **RapidGo** framework will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-03-15
+
+### Added
+- `Logger` interface in `core/logger` with `Debug`, `Info`, `Warn`, `Error`, `With` methods — enables pluggable logging backends (Zap, Zerolog, test spies)
+- `SlogLogger` struct — default `Logger` implementation wrapping `*slog.Logger`
+- `NewSlogLogger()` constructor
+- `config.LoadConfig[T]()` — generic struct-based config loader using `env:`, `default:`, and `validate:` struct tags. Supports string, int, bool, float64, `time.Duration`, and `[]string` (comma-separated). Validates via `go-playground/validator`.
+- `auth.GenerateTokenFromString(userID string)` — JWT generation for UUID/string-based primary keys, alongside existing `GenerateToken(uint)`
+
+### Changed
+- `logger.Setup()` now returns `Logger` interface instead of `*slog.Logger`. Global `slog.SetDefault()` still called — existing `slog.Info()` etc. continue to work unchanged.
+- `GenerateToken(uint)` refactored internally to share `jwtConfig()` helper. Behavior unchanged.
+
 ## [2.5.0] - 2026-03-15
 
 ### Changed
