@@ -85,3 +85,94 @@ func TestBaseModel_CreateAndQuery(t *testing.T) {
 		t.Fatal("expected CreatedAt to be set")
 	}
 }
+
+// --- UUIDBaseModel tests ---
+
+type testUUIDItem struct {
+	UUIDBaseModel
+	Name string `gorm:"size:255"`
+}
+
+// TC-U01: UUIDBaseModel has expected fields
+func TestUUIDBaseModel_Fields(t *testing.T) {
+	rt := reflect.TypeOf(UUIDBaseModel{})
+
+	checks := []struct {
+		name     string
+		wantType string
+	}{
+		{"ID", "string"},
+		{"CreatedAt", "time.Time"},
+		{"UpdatedAt", "time.Time"},
+		{"DeletedAt", "gorm.DeletedAt"},
+	}
+
+	for _, c := range checks {
+		f, ok := rt.FieldByName(c.name)
+		if !ok {
+			t.Fatalf("expected field %q on UUIDBaseModel", c.name)
+		}
+		if f.Type.String() != c.wantType {
+			t.Fatalf("expected %q to be %s, got %s", c.name, c.wantType, f.Type.String())
+		}
+	}
+}
+
+// TC-U02: Embedding UUIDBaseModel inherits ID
+func TestUUIDBaseModel_EmbedInheritsID(t *testing.T) {
+	item := testUUIDItem{UUIDBaseModel: UUIDBaseModel{ID: "abc-123"}}
+	if item.ID != "abc-123" {
+		t.Fatalf("expected item.ID == %q, got %q", "abc-123", item.ID)
+	}
+}
+
+// TC-U03: AutoMigrate succeeds with UUIDBaseModel-embedded struct
+func TestUUIDBaseModel_AutoMigrate(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to open db: %v", err)
+	}
+	if err := db.AutoMigrate(&testUUIDItem{}); err != nil {
+		t.Fatalf("AutoMigrate failed: %v", err)
+	}
+}
+
+// TC-U04: BeforeCreate auto-generates UUID when ID is empty
+func TestUUIDBaseModel_BeforeCreate_GeneratesUUID(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to open db: %v", err)
+	}
+	db.AutoMigrate(&testUUIDItem{})
+
+	item := testUUIDItem{Name: "auto-uuid"}
+	if err := db.Create(&item).Error; err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+	if item.ID == "" {
+		t.Fatal("expected non-empty UUID after create")
+	}
+	if len(item.ID) != 36 {
+		t.Fatalf("expected UUID length 36, got %d (%q)", len(item.ID), item.ID)
+	}
+}
+
+// TC-U05: BeforeCreate preserves pre-set ID
+func TestUUIDBaseModel_BeforeCreate_PreservesID(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to open db: %v", err)
+	}
+	db.AutoMigrate(&testUUIDItem{})
+
+	item := testUUIDItem{
+		UUIDBaseModel: UUIDBaseModel{ID: "custom-id-preserved"},
+		Name:          "pre-set",
+	}
+	if err := db.Create(&item).Error; err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+	if item.ID != "custom-id-preserved" {
+		t.Fatalf("expected ID %q, got %q", "custom-id-preserved", item.ID)
+	}
+}

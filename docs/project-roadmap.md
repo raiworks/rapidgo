@@ -206,6 +206,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 60 | v2.4.0 Release (Bugs + Quick Wins) | ✅ | All | Release (Shipped) |
 | 61 | v2.5.0 Release (DX + Error Codes) | ✅ | #60 | Release (Shipped) |
 | 62 | v2.6.0 Release (Logger Interface + Typed Config + JWT String) | ✅ | #61 | Release (Shipped) |
+| 63 | v2.7.0 Release (UUIDBaseModel + make:module) | 🟡 | #62 | Release (In Progress) |
 
 ---
 
