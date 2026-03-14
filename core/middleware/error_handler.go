@@ -19,11 +19,11 @@ func ErrorHandler() gin.HandlerFunc {
 		lastErr := c.Errors.Last().Err
 
 		if appErr, ok := lastErr.(*errors.AppError); ok {
-			c.JSON(appErr.Code, appErr.ErrorResponse())
+			c.JSON(appErr.Status, appErr.ErrorResponse())
 			return
 		}
 
 		wrapped := errors.Internal(lastErr)
-		c.JSON(wrapped.Code, wrapped.ErrorResponse())
+		c.JSON(wrapped.Status, wrapped.ErrorResponse())
 	}
 }

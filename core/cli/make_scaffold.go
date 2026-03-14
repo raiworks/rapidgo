@@ -145,3 +145,22 @@ func (p *{{.Name}}) Boot(c *container.Container) {
 	// Run after all providers are registered
 }
 `
+
+var makeSeederCmd = &cobra.Command{
+	Use:   "make:seeder [name]",
+	Short: "Create a new database seeder",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return scaffold("Seeder", args[0], seederTpl, "database/seeders", cmd.OutOrStdout())
+	},
+}
+
+var seederTpl = `package seeders
+
+import "gorm.io/gorm"
+
+func {{.Name}}Seeder(db *gorm.DB) error {
+	// Seed data here
+	return nil
+}
+`

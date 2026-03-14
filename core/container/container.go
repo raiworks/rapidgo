@@ -85,6 +85,37 @@ func MustMake[T any](c *Container, name string) T {
 	return c.Make(name).(T)
 }
 
+// TryMake resolves a service by name, returning an error instead of panicking
+// if the service is not registered.
+func (c *Container) TryMake(name string) (interface{}, error) {
+	c.mu.RLock()
+	if inst, ok := c.instances[name]; ok {
+		c.mu.RUnlock()
+		return inst, nil
+	}
+	factory, ok := c.bindings[name]
+	c.mu.RUnlock()
+	if !ok {
+		return nil, fmt.Errorf("service not found: %s", name)
+	}
+	return factory(c), nil
+}
+
+// TryMakeTyped resolves a service with type safety, returning an error
+// instead of panicking if the service is not found or the type assertion fails.
+func TryMake[T any](c *Container, name string) (T, error) {
+	var zero T
+	raw, err := c.TryMake(name)
+	if err != nil {
+		return zero, err
+	}
+	val, ok := raw.(T)
+	if !ok {
+		return zero, fmt.Errorf("service %s: type assertion failed", name)
+	}
+	return val, nil
+}
+
 // Has checks if a service is registered (binding or instance).
 func (c *Container) Has(name string) bool {
 	c.mu.RLock()

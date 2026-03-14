@@ -13,6 +13,24 @@ var dbSeedCmd = &cobra.Command{
 	Use:   "db:seed",
 	Short: "Seed the database with records",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Handle --list flag (no DB connection needed)
+		if list, _ := cmd.Flags().GetBool("list"); list {
+			if seederListFn == nil {
+				fmt.Fprintln(cmd.OutOrStdout(), "No seeder list registered. Call cli.SetSeederList() to enable.")
+				return nil
+			}
+			names := seederListFn()
+			if len(names) == 0 {
+				fmt.Fprintln(cmd.OutOrStdout(), "No seeders registered.")
+				return nil
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), "Available seeders:")
+			for _, name := range names {
+				fmt.Fprintln(cmd.OutOrStdout(), "  - "+name)
+			}
+			return nil
+		}
+
 		application := NewApp(service.ModeAll)
 		db := container.MustMake[*gorm.DB](application.Container, "db")
 
@@ -35,4 +53,5 @@ var dbSeedCmd = &cobra.Command{
 
 func init() {
 	dbSeedCmd.Flags().String("seeder", "", "Run a specific seeder by name")
+	dbSeedCmd.Flags().Bool("list", false, "List available seeders")
 }

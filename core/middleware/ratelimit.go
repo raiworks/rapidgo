@@ -1,6 +1,10 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -60,5 +64,64 @@ func RateLimitWithConfig(cfg RateLimitConfig) gin.HandlerFunc {
 			return
 		}
 		c.Next()
+	}
+}
+
+// KeyByIP returns a KeyFunc that uses the client IP address.
+func KeyByIP() func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		return c.ClientIP()
+	}
+}
+
+// KeyByUserID returns a KeyFunc that uses a value from the Gin context.
+// Typically set by auth middleware (e.g., c.Set("userID", id)).
+// Falls back to client IP if the context key is not set.
+func KeyByUserID(contextKey string) func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		if v, exists := c.Get(contextKey); exists {
+			return fmt.Sprintf("user:%v", v)
+		}
+		return c.ClientIP()
+	}
+}
+
+// KeyByHeader returns a KeyFunc that uses a specific request header value.
+// Falls back to client IP if the header is not present.
+func KeyByHeader(header string) func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		if v := c.GetHeader(header); v != "" {
+			return fmt.Sprintf("header:%s:%s", header, v)
+		}
+		return c.ClientIP()
+	}
+}
+
+// ParseRate validates a rate string in ulule format (e.g., "100-M", "10-S", "1000-H").
+// Returns an error if the format is invalid.
+func ParseRate(rate string) (limiter.Rate, error) {
+	return limiter.NewRateFromFormatted(rate)
+}
+
+// KeyByBodyField returns a KeyFunc that reads a JSON body field.
+// The request body is read and re-buffered so downstream handlers can still read it.
+// Falls back to client IP if the field is not present or the body is not JSON.
+func KeyByBodyField(field string) func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		body, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			return c.ClientIP()
+		}
+		// Re-buffer body for downstream handlers
+		c.Request.Body = io.NopCloser(bytes.NewReader(body))
+
+		var data map[string]any
+		if err := json.Unmarshal(body, &data); err != nil {
+			return c.ClientIP()
+		}
+		if v, ok := data[field]; ok {
+			return fmt.Sprintf("body:%s:%v", field, v)
+		}
+		return c.ClientIP()
 	}
 }
