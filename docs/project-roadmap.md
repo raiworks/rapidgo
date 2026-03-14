@@ -203,7 +203,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 57 | Importable Library Split | 🟡 | All | Infrastructure (In Progress) |
 | 58 | Documentation & AI Visibility | ✅ | All | Documentation (Shipped) |
 | 59 | v2.1.0 Release | ✅ | All | Release (Shipped) |
-| 60 | v2.4.0 Release (Bugs + Quick Wins) | 🟡 | All | Release (In Progress) |
+| 60 | v2.4.0 Release (Bugs + Quick Wins) | ✅ | All | Release (Shipped) |
 | 61 | v2.5.0 Release (DX + Error Codes) | ⬜ | #60 | Release (Not Started) |
 
 ---
