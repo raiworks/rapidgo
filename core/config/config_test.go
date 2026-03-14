@@ -316,3 +316,33 @@ func TestLoadConfig_NoEnvTag(t *testing.T) {
 		t.Errorf("Untagged = %q, want empty (skipped)", cfg.Untagged)
 	}
 }
+
+// TC-C09: MustLoadConfig succeeds with valid config
+func TestMustLoadConfig_Success(t *testing.T) {
+	type simpleConfig struct {
+		Name string `env:"TC_MUST_NAME" default:"app"`
+	}
+	t.Setenv("TC_MUST_NAME", "")
+
+	cfg := MustLoadConfig[simpleConfig]()
+	if cfg.Name != "app" {
+		t.Errorf("Name = %q, want %q", cfg.Name, "app")
+	}
+}
+
+// TC-C10: MustLoadConfig panics on validation failure
+func TestMustLoadConfig_PanicsOnError(t *testing.T) {
+	type requiredConfig struct {
+		Key string `env:"TC_MUST_REQ" validate:"required"`
+	}
+	t.Setenv("TC_MUST_REQ", "")
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("expected panic from MustLoadConfig")
+		}
+	}()
+
+	MustLoadConfig[requiredConfig]()
+}

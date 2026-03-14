@@ -77,6 +77,16 @@ func LoadConfig[T any]() (T, error) {
 	return cfg, nil
 }
 
+// MustLoadConfig is like LoadConfig but panics on error.
+// Use in application startup where a missing/invalid config is fatal.
+func MustLoadConfig[T any]() T {
+	cfg, err := LoadConfig[T]()
+	if err != nil {
+		panic(fmt.Sprintf("config: %v", err))
+	}
+	return cfg
+}
+
 // setField sets a reflect.Value from a raw string, supporting common Go types.
 func setField(fv reflect.Value, raw string) error {
 	switch fv.Kind() {

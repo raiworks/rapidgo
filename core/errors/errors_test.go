@@ -196,3 +196,63 @@ func TestHTTPStatus_ReturnsStatus(t *testing.T) {
 		t.Error("HTTPStatus() should equal Status")
 	}
 }
+
+// --- TC-18: ServiceUnavailable factory ---
+func TestServiceUnavailable(t *testing.T) {
+	appErr := ServiceUnavailable("down for maintenance")
+	if appErr.Status != 503 {
+		t.Errorf("Status = %d, want 503", appErr.Status)
+	}
+	if appErr.Code != CodeServiceUnavailable {
+		t.Errorf("Code = %q, want %q", appErr.Code, CodeServiceUnavailable)
+	}
+	if appErr.Message != "down for maintenance" {
+		t.Errorf("Message = %q, want %q", appErr.Message, "down for maintenance")
+	}
+}
+
+// --- TC-19: Timeout factory ---
+func TestTimeout(t *testing.T) {
+	appErr := Timeout("request timed out")
+	if appErr.Status != 504 {
+		t.Errorf("Status = %d, want 504", appErr.Status)
+	}
+	if appErr.Code != CodeTimeout {
+		t.Errorf("Code = %q, want %q", appErr.Code, CodeTimeout)
+	}
+}
+
+// --- TC-20: RateLimited factory ---
+func TestRateLimited(t *testing.T) {
+	appErr := RateLimited("too many requests")
+	if appErr.Status != 429 {
+		t.Errorf("Status = %d, want 429", appErr.Status)
+	}
+	if appErr.Code != CodeRateLimited {
+		t.Errorf("Code = %q, want %q", appErr.Code, CodeRateLimited)
+	}
+}
+
+// --- TC-21: Error code constants match factory defaults ---
+func TestErrorCodeConstants(t *testing.T) {
+	cases := []struct {
+		factory func(string) *AppError
+		code    string
+	}{
+		{NotFound, CodeNotFound},
+		{BadRequest, CodeBadRequest},
+		{Unauthorized, CodeUnauthorized},
+		{Forbidden, CodeForbidden},
+		{Conflict, CodeConflict},
+		{Unprocessable, CodeUnprocessable},
+		{ServiceUnavailable, CodeServiceUnavailable},
+		{Timeout, CodeTimeout},
+		{RateLimited, CodeRateLimited},
+	}
+	for _, tc := range cases {
+		err := tc.factory("msg")
+		if err.Code != tc.code {
+			t.Errorf("factory Code = %q, want %q", err.Code, tc.code)
+		}
+	}
+}
