@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -61,4 +62,40 @@ func RateLimitWithConfig(cfg RateLimitConfig) gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+// KeyByIP returns a KeyFunc that uses the client IP address.
+func KeyByIP() func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		return c.ClientIP()
+	}
+}
+
+// KeyByUserID returns a KeyFunc that uses a value from the Gin context.
+// Typically set by auth middleware (e.g., c.Set("userID", id)).
+// Falls back to client IP if the context key is not set.
+func KeyByUserID(contextKey string) func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		if v, exists := c.Get(contextKey); exists {
+			return fmt.Sprintf("user:%v", v)
+		}
+		return c.ClientIP()
+	}
+}
+
+// KeyByHeader returns a KeyFunc that uses a specific request header value.
+// Falls back to client IP if the header is not present.
+func KeyByHeader(header string) func(c *gin.Context) string {
+	return func(c *gin.Context) string {
+		if v := c.GetHeader(header); v != "" {
+			return fmt.Sprintf("header:%s:%s", header, v)
+		}
+		return c.ClientIP()
+	}
+}
+
+// ParseRate validates a rate string in ulule format (e.g., "100-M", "10-S", "1000-H").
+// Returns an error if the format is invalid.
+func ParseRate(rate string) (limiter.Rate, error) {
+	return limiter.NewRateFromFormatted(rate)
 }

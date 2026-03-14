@@ -49,15 +49,7 @@ var serveCmd = &cobra.Command{
 		if len(services) <= 1 || allSamePort(services) {
 			port := resolvePort(mode)
 
-			fmt.Println("=================================")
-			fmt.Printf("  %s Framework\n", appName)
-			fmt.Println("  github.com/raiworks/rapidgo")
-			fmt.Println("=================================")
-			fmt.Printf("  Environment: %s\n", appEnv)
-			fmt.Printf("  Mode: %s\n", mode)
-			fmt.Printf("  Port: %s\n", port)
-			fmt.Printf("  Debug: %v\n", config.IsDebug())
-			fmt.Println("=================================")
+			printBanner(appName, appEnv, mode.String(), port, nil)
 
 			slog.Info("server starting",
 				"app", appName,
@@ -70,17 +62,7 @@ var serveCmd = &cobra.Command{
 		}
 
 		// Multi-port — one server per service
-		fmt.Println("=================================")
-		fmt.Printf("  %s Framework\n", appName)
-		fmt.Println("  github.com/raiworks/rapidgo")
-		fmt.Println("=================================")
-		fmt.Printf("  Environment: %s\n", appEnv)
-		fmt.Printf("  Mode: %s\n", mode)
-		for _, svc := range services {
-			fmt.Printf("  %s → :%s\n", svc.String(), resolvePortForMode(svc))
-		}
-		fmt.Printf("  Debug: %v\n", config.IsDebug())
-		fmt.Println("=================================")
+		printBanner(appName, appEnv, mode.String(), "", services)
 
 		slog.Info("server starting (multi-port)",
 			"app", appName,
@@ -227,4 +209,29 @@ func allSamePort(services []service.Mode) bool {
 		}
 	}
 	return true
+}
+
+// printBanner displays the server startup banner.
+// If APP_BANNER is set, it replaces the default banner.
+// For multi-port mode, pass services; for single-port, pass port and nil services.
+func printBanner(appName, appEnv, mode, port string, services []service.Mode) {
+	if banner := config.Env("APP_BANNER", ""); banner != "" {
+		fmt.Println(banner)
+		return
+	}
+	fmt.Println("=================================")
+	fmt.Printf("  %s Framework\n", appName)
+	fmt.Println("  github.com/raiworks/rapidgo")
+	fmt.Println("=================================")
+	fmt.Printf("  Environment: %s\n", appEnv)
+	fmt.Printf("  Mode: %s\n", mode)
+	if len(services) > 0 {
+		for _, svc := range services {
+			fmt.Printf("  %s → :%s\n", svc.String(), resolvePortForMode(svc))
+		}
+	} else if port != "" {
+		fmt.Printf("  Port: %s\n", port)
+	}
+	fmt.Printf("  Debug: %v\n", config.IsDebug())
+	fmt.Println("=================================")
 }

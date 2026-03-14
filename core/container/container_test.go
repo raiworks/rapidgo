@@ -223,3 +223,48 @@ func TestBind_FactoryResolvesDependency(t *testing.T) {
 		t.Errorf("expected 'postgres://localhost', got '%s'", db.Config.DSN)
 	}
 }
+
+// TC-18: TryMake returns error for missing service (no panic)
+func TestTryMake_MissingService(t *testing.T) {
+	c := New()
+	_, err := c.TryMake("missing")
+	if err == nil {
+		t.Fatal("TryMake should return error for missing service")
+	}
+}
+
+// TC-19: TryMake returns value for registered service
+func TestTryMake_RegisteredService(t *testing.T) {
+	c := New()
+	c.Instance("greeting", "hello")
+	val, err := c.TryMake("greeting")
+	if err != nil {
+		t.Fatalf("TryMake error: %v", err)
+	}
+	if val != "hello" {
+		t.Errorf("TryMake = %v, want %q", val, "hello")
+	}
+}
+
+// TC-20: Generic TryMake catches type assertion failure
+func TestTryMakeGeneric_TypeMismatch(t *testing.T) {
+	c := New()
+	c.Instance("count", 42)
+	_, err := TryMake[string](c, "count")
+	if err == nil {
+		t.Fatal("TryMake[string] should return error for int service")
+	}
+}
+
+// TC-21: Generic TryMake returns correct type
+func TestTryMakeGeneric_CorrectType(t *testing.T) {
+	c := New()
+	c.Instance("name", "rapidgo")
+	val, err := TryMake[string](c, "name")
+	if err != nil {
+		t.Fatalf("TryMake error: %v", err)
+	}
+	if val != "rapidgo" {
+		t.Errorf("TryMake = %q, want %q", val, "rapidgo")
+	}
+}

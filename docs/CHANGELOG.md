@@ -5,6 +5,28 @@ All notable changes to the **RapidGo** framework will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-03-15
+
+### Changed
+- **BREAKING**: `AppError.Code int` renamed to `AppError.Status int`. `Code` is now a `string` field for machine-readable error codes (e.g., `"NOT_FOUND"`, `"BAD_REQUEST"`). Migration: replace `err.Code` (int) → `err.Status` (int). Caught at compile time.
+- `ErrorResponse()` now includes `"code"` field in JSON output
+- Error handler middleware uses `AppError.Status` for HTTP status code
+- Startup banner extracted to `printBanner()` function with `APP_BANNER` env var override
+
+### Added
+- `AppError.WithCode(code string)` builder for custom machine-readable error codes
+- `AppError.HTTPStatus()` deprecated helper (returns `Status` field)
+- Default `Code` values on all 7 error factories: `NOT_FOUND`, `BAD_REQUEST`, `INTERNAL_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `UNPROCESSABLE`
+- Rate limit key helpers: `KeyByIP()`, `KeyByUserID()`, `KeyByHeader()`
+- `ParseRate()` for validating rate limit format strings
+- `container.TryMake()` and generic `container.TryMake[T]()` — safe service resolution that returns errors instead of panicking
+- `config.IsLocal()` helper — returns true for `APP_ENV=local` or `APP_ENV=development`
+- `migrate:fresh` command — drops all tables and re-runs migrations (requires `--force` in production)
+- `db:wipe` command — truncates all tables except `migrations` (requires `--force` in production)
+- `db:seed --list` flag — lists available seeders when `SetSeederList()` is configured
+- `cli.SetSeederList()` hook for registering seeder names
+- `make:seeder` scaffold command — generates seeder files in `database/seeders/`
+
 ## [2.4.0] - 2026-03-15
 
 ### Fixed

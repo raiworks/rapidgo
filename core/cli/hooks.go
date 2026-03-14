@@ -27,6 +27,9 @@ type ModelRegistryFunc func() []interface{}
 // SeederFunc runs database seeders. If name is empty, runs all seeders.
 type SeederFunc func(db *gorm.DB, name string) error
 
+// SeederListFunc returns a list of registered seeder names.
+type SeederListFunc func() []string
+
 var (
 	bootstrapFn       BootstrapFunc
 	routeRegistrar    RouteRegistrar
@@ -34,6 +37,7 @@ var (
 	scheduleRegistrar ScheduleRegistrar
 	modelRegistryFn   ModelRegistryFunc
 	seederFn          SeederFunc
+	seederListFn      SeederListFunc
 )
 
 // SetBootstrap sets the function that registers service providers during app initialization.
@@ -53,3 +57,6 @@ func SetModelRegistry(fn ModelRegistryFunc) { modelRegistryFn = fn }
 
 // SetSeeder sets the function that runs database seeders.
 func SetSeeder(fn SeederFunc) { seederFn = fn }
+
+// SetSeederList sets the function that returns available seeder names for db:seed --list.
+func SetSeederList(fn SeederListFunc) { seederListFn = fn }

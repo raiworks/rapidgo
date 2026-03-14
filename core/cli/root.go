@@ -11,7 +11,7 @@ import (
 )
 
 // Version is the current framework version.
-const Version = "2.4.0"
+const Version = "2.5.0"
 
 var rootCmd = &cobra.Command{
 	Use:   "rapidgo",
@@ -34,6 +34,9 @@ func init() {
 	rootCmd.AddCommand(scheduleRunCmd)
 	rootCmd.AddCommand(makeAdminCmd)
 	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(migrateFreshCmd)
+	rootCmd.AddCommand(dbWipeCmd)
+	rootCmd.AddCommand(makeSeederCmd)
 }
 
 // Execute runs the root command. Called from main().

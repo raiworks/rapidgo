@@ -9,7 +9,7 @@ import (
 
 // --- TC-01: AppError implements error interface ---
 func TestAppError_ImplementsErrorInterface(t *testing.T) {
-	appErr := &AppError{Code: 404, Message: "not found"}
+	appErr := &AppError{Status: 404, Code: "NOT_FOUND", Message: "not found"}
 	var _ error = appErr // compile-time check
 
 	if got := appErr.Error(); got != "not found" {
@@ -46,8 +46,8 @@ func TestErrorsAs_ExtractsAppError(t *testing.T) {
 	if !errors.As(err, &appErr) {
 		t.Fatal("errors.As failed to extract *AppError")
 	}
-	if appErr.Code != 404 {
-		t.Errorf("Code = %d, want 404", appErr.Code)
+	if appErr.Status != 404 {
+		t.Errorf("Status = %d, want 404", appErr.Status)
 	}
 }
 
@@ -56,31 +56,35 @@ func TestConstructors(t *testing.T) {
 	tests := []struct {
 		name    string
 		create  func() *AppError
-		code    int
+		status  int
+		code    string
 		message string
 		hasErr  bool
 	}{
 		// TC-05
-		{"NotFound", func() *AppError { return NotFound("user not found") }, 404, "user not found", false},
+		{"NotFound", func() *AppError { return NotFound("user not found") }, 404, "NOT_FOUND", "user not found", false},
 		// TC-06
-		{"BadRequest", func() *AppError { return BadRequest("invalid input") }, 400, "invalid input", false},
+		{"BadRequest", func() *AppError { return BadRequest("invalid input") }, 400, "BAD_REQUEST", "invalid input", false},
 		// TC-07
-		{"Internal", func() *AppError { return Internal(io.EOF) }, 500, "internal server error", true},
+		{"Internal", func() *AppError { return Internal(io.EOF) }, 500, "INTERNAL_ERROR", "internal server error", true},
 		// TC-08
-		{"Unauthorized", func() *AppError { return Unauthorized("login required") }, 401, "login required", false},
+		{"Unauthorized", func() *AppError { return Unauthorized("login required") }, 401, "UNAUTHORIZED", "login required", false},
 		// TC-09
-		{"Forbidden", func() *AppError { return Forbidden("access denied") }, 403, "access denied", false},
+		{"Forbidden", func() *AppError { return Forbidden("access denied") }, 403, "FORBIDDEN", "access denied", false},
 		// TC-10
-		{"Conflict", func() *AppError { return Conflict("already exists") }, 409, "already exists", false},
+		{"Conflict", func() *AppError { return Conflict("already exists") }, 409, "CONFLICT", "already exists", false},
 		// TC-11
-		{"Unprocessable", func() *AppError { return Unprocessable("validation failed") }, 422, "validation failed", false},
+		{"Unprocessable", func() *AppError { return Unprocessable("validation failed") }, 422, "UNPROCESSABLE", "validation failed", false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			appErr := tt.create()
+			if appErr.Status != tt.status {
+				t.Errorf("Status = %d, want %d", appErr.Status, tt.status)
+			}
 			if appErr.Code != tt.code {
-				t.Errorf("Code = %d, want %d", appErr.Code, tt.code)
+				t.Errorf("Code = %q, want %q", appErr.Code, tt.code)
 			}
 			if appErr.Message != tt.message {
 				t.Errorf("Message = %q, want %q", appErr.Message, tt.message)
@@ -149,5 +153,46 @@ func TestErrorResponse_DebugMode_NilErr(t *testing.T) {
 	}
 	if _, exists := resp["internal"]; exists {
 		t.Error("internal key should not exist when Err is nil")
+	}
+}
+
+// --- TC-15: WithCode overrides default code ---
+func TestWithCode_OverridesDefault(t *testing.T) {
+	appErr := BadRequest("invalid email").WithCode("INVALID_EMAIL")
+	if appErr.Code != "INVALID_EMAIL" {
+		t.Errorf("Code = %q, want %q", appErr.Code, "INVALID_EMAIL")
+	}
+	if appErr.Status != 400 {
+		t.Errorf("Status = %d, want 400", appErr.Status)
+	}
+}
+
+// --- TC-16: ErrorResponse includes code field ---
+func TestErrorResponse_IncludesCode(t *testing.T) {
+	os.Setenv("APP_DEBUG", "false")
+	defer os.Unsetenv("APP_DEBUG")
+
+	appErr := NotFound("user not found")
+	resp := appErr.ErrorResponse()
+
+	if resp["code"] != "NOT_FOUND" {
+		t.Errorf("code = %v, want %q", resp["code"], "NOT_FOUND")
+	}
+	if resp["success"] != false {
+		t.Errorf("success = %v, want false", resp["success"])
+	}
+	if resp["error"] != "user not found" {
+		t.Errorf("error = %v, want %q", resp["error"], "user not found")
+	}
+}
+
+// --- TC-17: HTTPStatus deprecated helper ---
+func TestHTTPStatus_ReturnsStatus(t *testing.T) {
+	appErr := Forbidden("no access")
+	if appErr.HTTPStatus() != 403 {
+		t.Errorf("HTTPStatus() = %d, want 403", appErr.HTTPStatus())
+	}
+	if appErr.HTTPStatus() != appErr.Status {
+		t.Error("HTTPStatus() should equal Status")
 	}
 }
