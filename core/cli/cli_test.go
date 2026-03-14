@@ -2,6 +2,9 @@ package cli
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/raiworks/rapidgo/v2/core/app"
@@ -168,5 +171,42 @@ func TestToSnakeCase(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("toSnakeCase(%q) = %q, want %q", tc.input, got, tc.want)
 		}
+	}
+}
+
+// TC-M01: make:module creates 4 files in modules/<snake_name>/
+func TestMakeModuleCmd_Creates4Files(t *testing.T) {
+	tmp := t.TempDir()
+	original, _ := os.Getwd()
+	os.Chdir(tmp)
+	defer os.Chdir(original)
+
+	makeModuleCmd.SetArgs([]string{"Product"})
+	var buf bytes.Buffer
+	makeModuleCmd.SetOut(&buf)
+
+	if err := makeModuleCmd.RunE(makeModuleCmd, []string{"Product"}); err != nil {
+		t.Fatalf("make:module failed: %v", err)
+	}
+
+	expected := []string{
+		filepath.Join("modules", "product", "models.go"),
+		filepath.Join("modules", "product", "service.go"),
+		filepath.Join("modules", "product", "controller.go"),
+		filepath.Join("modules", "product", "routes.go"),
+	}
+
+	for _, path := range expected {
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			t.Errorf("expected file %s to exist", path)
+		}
+	}
+
+	output := buf.String()
+	if !strings.Contains(output, "Models created") {
+		t.Error("expected output to contain 'Models created'")
+	}
+	if !strings.Contains(output, "Routes created") {
+		t.Error("expected output to contain 'Routes created'")
 	}
 }
