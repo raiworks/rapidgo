@@ -207,6 +207,8 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 61 | v2.5.0 Release (DX + Error Codes) | ✅ | #60 | Release (Shipped) |
 | 62 | v2.6.0 Release (Logger Interface + Typed Config + JWT String) | ✅ | #61 | Release (Shipped) |
 | 63 | v2.7.0 Release (UUIDBaseModel + make:module) | ✅ | #62 | Release (Shipped) |
+| 64 | v2.7.1 Release (MustLoadConfig + error constants + factories) | ✅ | #63 | Release (Shipped) |
+| 65 | v2.7.2 Release (BUG-03 template fix + IMP-03 seeder warning + FEAT-01 SafeSingleton) | ✅ | #64 | Release (Shipped) |
 
 ---
 
@@ -271,7 +273,7 @@ Every blueprint section mapped to its feature number. No gaps, no extras.
 | Phase 5 — Deploy + Testing + DX | 36–41 | 6/6 | 0 | ✅ Complete |
 | Phase 6 — Advanced | 42–54 | 13/13 | 0 | ✅ Complete |
 | Additional | 55–56 | 2/2 | 0 | ✅ Complete |
-| **Total** | **01–56** | **56/56** | **0** | **✅ Complete** |
+| **Total** | **01–65** | **65/65** | **0** | **✅ Complete** |
 
 ---
 
