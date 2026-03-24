@@ -5,6 +5,28 @@ All notable changes to the **RapidGo** framework will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.2] - 2026-03-15
+
+### Fixed
+- **BUG-03**: `applyRoutesForMode()` no longer overwrites custom `FuncMap` on routers that already have templates loaded — adds `TemplatesLoaded()` guard in `core/router`
+
+### Added
+- `container.SafeSingleton()` — catches factory panics in local/dev mode and logs a warning instead of crashing. Production panics propagate as normal. (`core/container`)
+- `seeders.RunAll()` now logs `slog.Warn` when the seeder registry is empty (previously silent no-op)
+
+## [2.7.1] - 2026-03-15
+
+### Added
+- `config.MustLoadConfig[T]()` — like `LoadConfig[T]()` but panics on error. Use at startup where missing/invalid config is fatal. (`core/config`)
+- 20 exported error code constants (`CodeNotFound`, `CodeBadRequest`, `CodeServiceUnavailable`, `CodeTimeout`, `CodeRateLimited`, etc.) in `core/errors`
+- `errors.ServiceUnavailable()` factory — creates 503 errors with `SERVICE_UNAVAILABLE` code
+- `errors.Timeout()` factory — creates 504 errors with `TIMEOUT` code
+- `errors.RateLimited()` factory — creates 429 errors with `RATE_LIMITED` code
+- 5 integration guides: pgx, SQL migrations, Zap, Zerolog, Viper (`docs/framework/guides/`)
+
+### Changed
+- Existing error factories now use exported constants instead of inline strings (no behavior change)
+
 ## [2.7.0] - 2026-03-15
 
 ### Added
