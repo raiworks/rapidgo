@@ -126,17 +126,5 @@ func NewStore(driver, prefix string) (Store, error) {
 
 // newRedisClient creates a Redis client from env vars.
 func newRedisClient() (*redis.Client, error) {
-	host := os.Getenv("REDIS_HOST")
-	if host == "" {
-		host = "localhost"
-	}
-	port := os.Getenv("REDIS_PORT")
-	if port == "" {
-		port = "6379"
-	}
-	password := os.Getenv("REDIS_PASSWORD")
-	return redis.NewClient(&redis.Options{
-		Addr:     host + ":" + port,
-		Password: password,
-	}), nil
+	return NewRedisClient(nil), nil
 }
