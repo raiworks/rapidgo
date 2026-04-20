@@ -5,6 +5,20 @@ All notable changes to the **RapidGo** framework will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.3] - 2026-04-20
+
+### Fixed
+- **REDIS_DB env var silently ignored** — `core/cache` and `core/session` now honor `REDIS_DB` when building Redis clients. Previously all clients defaulted to DB 0 regardless of configuration.
+
+### Added
+- `cache.NewRedisClient(dbOverride *int)` — exported helper that builds a `*redis.Client` from env vars (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB`) with optional DB override for multi-client registration
+- New optional Redis env vars with sensible defaults: `REDIS_POOL_SIZE` (10), `REDIS_DIAL_TIMEOUT` (5s), `REDIS_READ_TIMEOUT` (3s), `REDIS_WRITE_TIMEOUT` (3s)
+- 12 tests for `NewRedisClient` covering DB selection, override precedence, invalid input, pool/timeout config
+
+### Changed
+- `core/cache/cache.go` — `newRedisClient()` now delegates to `NewRedisClient(nil)`
+- `core/session/factory.go` — Redis branch uses `cache.NewRedisClient(nil)` instead of inline client creation
+
 ## [2.7.2] - 2026-03-15
 
 ### Fixed

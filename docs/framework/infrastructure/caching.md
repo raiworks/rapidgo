@@ -46,6 +46,16 @@ document are to be interpreted as described in [RFC 2119].
 CACHE_DRIVER=redis
 CACHE_PREFIX=app:
 CACHE_TTL=3600
+
+# Redis connection
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+# REDIS_POOL_SIZE=10
+# REDIS_DIAL_TIMEOUT=5s
+# REDIS_READ_TIMEOUT=3s
+# REDIS_WRITE_TIMEOUT=3s
 ```
 
 ## 3. Cache Interface
@@ -159,6 +169,44 @@ func (p *CacheProvider) Register(c *container.Container) {
 func (p *CacheProvider) Boot(c *container.Container) {}
 ```
 
+## 7.1 Redis Client Helper (v2.7.3+)
+
+`cache.NewRedisClient(dbOverride *int)` builds a `*redis.Client`
+from environment variables. If `dbOverride` is non-nil, it takes
+precedence over the `REDIS_DB` env var.
+
+### Single Client (default)
+
+```go
+c.Singleton("redis", func(_ *container.Container) interface{} {
+    return cache.NewRedisClient(nil) // reads REDIS_DB from env
+})
+```
+
+### Multiple Named Clients
+
+For apps that need separate logical DBs (cache, sessions, pub/sub):
+
+```go
+c.Singleton("redis", func(_ *container.Container) interface{} {
+    return cache.NewRedisClient(nil) // default DB from env
+})
+c.Singleton("redis.cache", func(_ *container.Container) interface{} {
+    db := 2
+    return cache.NewRedisClient(&db)
+})
+c.Singleton("redis.pubsub", func(_ *container.Container) interface{} {
+    db := 5
+    return cache.NewRedisClient(&db)
+})
+```
+
+Resolve anywhere:
+
+```go
+cacheClient := container.MustMake[*redis.Client](c, "redis.cache")
+```
+
 ## 8. Security Considerations
 
 - Cache keys **MUST NOT** include unvalidated user input to prevent
@@ -178,4 +226,5 @@ func (p *CacheProvider) Boot(c *container.Container) {}
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 0.2.0 | 2026-04-20 | raiworks | Add REDIS_DB, pool/timeout env vars, multi-client pattern |
 | 0.1.0 | 2026-03-05 | raiworks | Initial draft |
