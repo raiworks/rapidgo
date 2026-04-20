@@ -1,9 +1,9 @@
 ---
 title: "Caching"
-version: "0.1.0"
+version: "0.2.0"
 status: "Final"
 date: "2026-03-05"
-last_updated: "2026-03-10"
+last_updated: "2026-04-20"
 authors:
   - "raiworks"
 supersedes: ""
@@ -185,7 +185,8 @@ c.Singleton("redis", func(_ *container.Container) interface{} {
 
 ### Multiple Named Clients
 
-For apps that need separate logical DBs (cache, sessions, pub/sub):
+For apps that need separate logical DBs (cache, sessions, pub/sub).
+For cross-process pub/sub messaging, see [`pubsub.md`](pubsub.md).
 
 ```go
 c.Singleton("redis", func(_ *container.Container) interface{} {
