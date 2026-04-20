@@ -5,6 +5,21 @@ All notable changes to the **RapidGo** framework will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-04-20
+
+### Added
+- **New `core/pubsub` package** — Cross-process publish/subscribe messaging over Redis
+  - `Publisher` interface with `NewRedisPublisher(client)` — wraps Redis PUBLISH
+  - `Subscriber` interface with `NewRedisSubscriber(client, opts)` — auto-reconnect with exponential backoff
+  - `SubscriberOptions` for configurable `MinBackoff` (500ms), `MaxBackoff` (30s), `PingEvery` (30s), `Logger`
+  - `Handler` type: `func(ctx context.Context, channel, payload string)`
+  - Panic recovery in handler dispatch — panicking handlers are logged, not fatal
+  - 8 tests using miniredis covering publish/receive, multi-channel, context cancel, reconnect, error, defaults, empty channels, handler panic
+- New documentation: `docs/framework/infrastructure/pubsub.md` — API reference, usage examples, reconnect semantics, limitations
+
+### Changed
+- `docs/framework/infrastructure/caching.md` — bumped to v0.2.0, added cross-reference to pubsub.md in §7.1
+
 ## [2.7.3] - 2026-04-20
 
 ### Fixed
