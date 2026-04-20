@@ -209,6 +209,7 @@ Every feature follows the [Mastery lifecycle](mastery.md): Discuss → Design �
 | 63 | v2.7.0 Release (UUIDBaseModel + make:module) | ✅ | #62 | Release (Shipped) |
 | 64 | v2.7.1 Release (MustLoadConfig + error constants + factories) | ✅ | #63 | Release (Shipped) |
 | 65 | v2.7.2 Release (BUG-03 template fix + IMP-03 seeder warning + FEAT-01 SafeSingleton) | ✅ | #64 | Release (Shipped) |
+| 66 | v2.7.3 Release (REDIS_DB fix + NewRedisClient multi-client helper) | ✅ | #65 | Release (Shipped) |
 
 ---
 
