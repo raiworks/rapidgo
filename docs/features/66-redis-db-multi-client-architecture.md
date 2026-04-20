@@ -79,9 +79,11 @@ func NewRedisClient(dbOverride *int) *redis.Client {
 
 ```go
 func envStr(key, fallback string) string
-func envInt(key string, fallback int) int
+func envInt(key string, fallback int) int       // returns fallback if value is non-numeric or negative
 func envDuration(key string, fallback time.Duration) time.Duration
 ```
+
+**`envInt` behavior**: If `REDIS_DB` (or any int env var) is empty, non-numeric, or negative, the fallback is returned. This prevents negative DB indices which Redis does not support.
 
 ### Changes to cache.go
 
